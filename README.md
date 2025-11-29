@@ -1,4 +1,4 @@
-# Flinn
+# Fugo
 
 [![C++](https://img.shields.io/badge/C++-23-blue.svg)](https://isocpp.org/)
 [![License](https://img.shields.io/github/license/ksergey/turboq)](LICENSE)

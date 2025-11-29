@@ -1,0 +1,35 @@
+// Copyright (c) Sergey Kovalevich <inndie@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0
+
+#pragma once
+
+#include "Sink.h"
+
+namespace fugo::logger {
+
+class StdOutSink final : public Sink {
+private:
+  std::string pattern_ = "{timestamp} [{level}] ({threadID}) {message} ({file}:{line})";
+
+public:
+  StdOutSink(StdOutSink const&) = delete;
+  StdOutSink& operator=(StdOutSink const&) = delete;
+  StdOutSink() = default;
+
+  /// Formatting pattern
+  [[nodiscard]] auto pattern() const noexcept -> std::string const& {
+    return pattern_;
+  }
+
+  /// Set formatting pattern
+  void setPattern(std::string value) noexcept {
+    pattern_ = std::move(value);
+  }
+
+  void write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
+      std::thread::id const& threadID, std::string_view message) override;
+
+  void flush() override;
+};
+
+} // namespace fugo::logger

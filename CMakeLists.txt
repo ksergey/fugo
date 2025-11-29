@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(Flinn CXX)
+project(Fugo CXX)
 
-option(FLINN_SANITIZER "Build with sanitizer" OFF)
+option(FUGO_SANITIZER "Build with sanitizer" OFF)
 
-include(cmake/FlinnUtils.cmake)
+include(cmake/FugoUtils.cmake)
 
+if (NOT TARGET fmt::fmt)
+  add_subdirectory(deps/fmtlib)
+endif()
 if (NOT TARGET doctest::doctest_with_main)
   add_subdirectory(deps/doctest)
 endif()
@@ -21,5 +24,4 @@ endif()
 
 enable_testing()
 
-add_subdirectory(flinn_core)
-add_subdirectory(flinn_logger)
+add_subdirectory(libs)
