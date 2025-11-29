@@ -86,6 +86,11 @@ public:
     return &threadContext;
   }
 
+  /// Return true on backend thread running
+  [[nodiscard]] FUGO_FORCE_INLINE auto backendThreadRunning() const noexcept {
+    return backendThreadRunning_.load(std::memory_order_acquire);
+  }
+
   /// Start backend background thread
   void startBackendThread();
 

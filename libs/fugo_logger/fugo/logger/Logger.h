@@ -29,6 +29,11 @@ FUGO_FORCE_INLINE void setQueueCapacityHint(std::size_t sizeHint) {
   loggerContext()->setQueueCapacityHint(sizeHint);
 }
 
+/// Log verbosity level
+FUGO_FORCE_INLINE auto logLevel() noexcept -> LogLevel {
+  return loggerContext()->logLevel();
+}
+
 /// Set log verbosity level
 FUGO_FORCE_INLINE void setLogLevel(LogLevel value) {
   loggerContext()->setLogLevel(value);
@@ -47,11 +52,16 @@ FUGO_FORCE_INLINE void setLogLevel(std::string_view value) {
     return loggerContext()->setLogLevel(LogLevel::Notice);
   } else if (value == "debug"sv) {
     return loggerContext()->setLogLevel(LogLevel::Debug);
-  } else if (value == "Trace"sv) {
+  } else if (value == "trace"sv) {
     return loggerContext()->setLogLevel(LogLevel::Trace);
   }
 
   throw std::invalid_argument("invalid log level string value");
+}
+
+/// Check backend thread running
+FUGO_FORCE_INLINE auto backendThreadRunning() noexcept -> bool {
+  return loggerContext()->backendThreadRunning();
 }
 
 /// Start backend thread
