@@ -5,6 +5,8 @@
 
 #include <atomic>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 #include <fmt/format.h>
 
@@ -17,11 +19,18 @@ namespace fugo::logger {
 class LoggerContext {
 private:
   ThreadContextManager threadContextManager_;
+  // Current max verbosity level
   std::atomic<LogLevel> logLevel_{LogLevel::Notice};
+  // Sink
   std::atomic<std::shared_ptr<Sink>> sink_;
-
-  // cache for message formatting
+  // Cache for message formatting
   fmt::memory_buffer formatBuffer_;
+  // Guard for thread start
+  std::atomic<std::once_flag*> startOnceFlag_;
+  // Backend thread
+  std::jthread backendThread_;
+  // Flag indicates backend thread is running
+  std::atomic<bool> backendThreadRunning_ = false;
 
 public:
   static auto instance() noexcept -> LoggerContext* {
@@ -75,15 +84,20 @@ public:
     return &threadContext;
   }
 
+  void startBackendThread();
+
+  void stopBackendThread();
+
   void backendWork();
 
 private:
   LoggerContext();
-
-  ~LoggerContext() = default;
+  ~LoggerContext();
 
   void processLogRecord(
       Sink* sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata, std::byte const* argsBuffer);
+
+  void runBackendThread();
 };
 
 inline auto loggerContext() noexcept -> LoggerContext* {

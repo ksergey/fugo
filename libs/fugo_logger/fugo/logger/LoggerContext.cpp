@@ -12,7 +12,38 @@
 
 namespace fugo::logger {
 
-LoggerContext::LoggerContext() : sink_(std::make_shared<StdOutSink>()) {}
+LoggerContext::LoggerContext() : sink_(std::make_shared<StdOutSink>()), startOnceFlag_(new std::once_flag) {}
+
+LoggerContext::~LoggerContext() {
+  this->stopBackendThread();
+  // TODO: ??
+  this->backendWork();
+}
+
+void LoggerContext::startBackendThread() {
+  std::call_once(*startOnceFlag_.load(), [this] {
+    this->runBackendThread();
+
+    std::atexit([] {
+      loggerContext()->stopBackendThread();
+    });
+  });
+}
+
+void LoggerContext::stopBackendThread() {
+  // Stop backend thread
+  if (!backendThreadRunning_.exchange(false)) {
+    return;
+  }
+
+  // Join thread
+  if (backendThread_.joinable()) {
+    backendThread_.join();
+  }
+
+  auto flag = std::make_unique<std::once_flag>();
+  auto oldFlag = std::unique_ptr<std::once_flag>(startOnceFlag_.exchange(flag.release()));
+}
 
 void LoggerContext::backendWork() {
   // TODO:
@@ -76,6 +107,34 @@ void LoggerContext::processLogRecord(
 
   sink->write(*metadata->location, metadata->level, logRecordHeader->timestamp, logRecordHeader->threadID, message);
   sink->flush();
+}
+
+void LoggerContext::runBackendThread() {
+  auto thread = std::jthread([this] {
+    backendThreadRunning_.store(true);
+
+    while (backendThreadRunning_.load(std::memory_order_relaxed)) {
+      try {
+        this->backendWork();
+      } catch (std::exception const& e) {
+        fmt::print(stderr, "Logger backend thread error: {}\n", e.what());
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    }
+  });
+
+  try {
+    this->backendWork();
+  } catch (std::exception const& e) {
+    fmt::print(stderr, "Logger backend thread error: {}\n", e.what());
+  }
+
+  backendThread_.swap(thread);
+
+  // wait for the thread start
+  while (!backendThreadRunning_.load(std::memory_order_seq_cst)) {
+    std::this_thread::sleep_for(std::chrono::microseconds{100});
+  }
 }
 
 } // namespace fugo::logger
