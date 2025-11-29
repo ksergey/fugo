@@ -62,13 +62,14 @@ TEST_CASE("Logger: fun") {
 }
 
 TEST_CASE("Logger: ohm") {
-  loggerContext()->setQueueCapacityHint(1024 * 1024 * 10);
-  loggerContext()->startBackendThread();
-  loggerContext()->startBackendThread();
+  fugo::logger::setQueueCapacityHint(1024 * 1024);
+  fugo::logger::startBackendThread();
+  fugo::logger::setLogLevel(LogLevel::Trace);
 
   logNotice("Hello {}!", "world");
 
-  loggerContext()->stopBackendThread();
+  // loggerContext()->stopBackendThread();
+  // loggerContext()->startBackendThread();
 }
 
 } // namespace fugo::logger

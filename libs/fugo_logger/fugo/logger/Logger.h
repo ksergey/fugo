@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <fmt/format.h>
 
 #include "Codec.h"
@@ -21,6 +23,46 @@ constexpr void decodeFormatArgs(
 }
 
 } // namespace detail
+
+/// Set queue capacity hint
+FUGO_FORCE_INLINE void setQueueCapacityHint(std::size_t sizeHint) {
+  loggerContext()->setQueueCapacityHint(sizeHint);
+}
+
+/// Set log verbosity level
+FUGO_FORCE_INLINE void setLogLevel(LogLevel value) {
+  loggerContext()->setLogLevel(value);
+}
+
+/// Set log verbosity level from string value
+/// throws on error
+FUGO_FORCE_INLINE void setLogLevel(std::string_view value) {
+  using namespace std::string_view_literals;
+
+  if (value == "error"sv) {
+    return loggerContext()->setLogLevel(LogLevel::Error);
+  } else if (value == "warning"sv) {
+    return loggerContext()->setLogLevel(LogLevel::Warning);
+  } else if (value == "notice"sv) {
+    return loggerContext()->setLogLevel(LogLevel::Notice);
+  } else if (value == "debug"sv) {
+    return loggerContext()->setLogLevel(LogLevel::Debug);
+  } else if (value == "Trace"sv) {
+    return loggerContext()->setLogLevel(LogLevel::Trace);
+  }
+
+  throw std::invalid_argument("invalid log level string value");
+}
+
+/// Start backend thread
+FUGO_FORCE_INLINE void startBackendThread() {
+  loggerContext()->startBackendThread();
+}
+
+/// Stop backend thread
+FUGO_FORCE_INLINE void stopBackendThread() {
+  loggerContext()->stopBackendThread();
+}
 
 /// Log statement handler
 /// @tparam M is struct with metadata from macro

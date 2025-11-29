@@ -16,7 +16,7 @@ LoggerContext::LoggerContext() : sink_(std::make_shared<StdOutSink>()), startOnc
 
 LoggerContext::~LoggerContext() {
   this->stopBackendThread();
-  // TODO: ??
+  // XXX: one more time?
   this->backendWork();
 }
 

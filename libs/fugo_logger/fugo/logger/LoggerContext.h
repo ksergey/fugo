@@ -16,6 +16,8 @@
 
 namespace fugo::logger {
 
+// TODO: refactoring, split?
+
 class LoggerContext {
 private:
   ThreadContextManager threadContextManager_;
@@ -84,10 +86,13 @@ public:
     return &threadContext;
   }
 
+  /// Start backend background thread
   void startBackendThread();
 
+  /// Stop backend background thread
   void stopBackendThread();
 
+  // TODO: make private
   void backendWork();
 
 private:
@@ -100,6 +105,7 @@ private:
   void runBackendThread();
 };
 
+/// Alias for LoggerContext::instance()
 inline auto loggerContext() noexcept -> LoggerContext* {
   return LoggerContext::instance();
 }
