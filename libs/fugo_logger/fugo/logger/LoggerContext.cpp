@@ -12,16 +12,23 @@
 
 namespace fugo::logger {
 
-LoggerContext::LoggerContext() : sink_(std::make_shared<StdOutSink>()), startOnceFlag_(new std::once_flag) {}
+LoggerContext::LoggerContext() : startOnceFlag_(new std::once_flag) {}
 
 LoggerContext::~LoggerContext() {
   this->stopBackendThread();
   // XXX: one more time?
-  this->backendWork();
+  this->runBackendWorkOnce();
 }
 
-void LoggerContext::startBackendThread() {
-  std::call_once(*startOnceFlag_.load(), [this] {
+void LoggerContext::startBackendThread(std::unique_ptr<Sink> sink) {
+  std::call_once(*startOnceFlag_.load(), [&] {
+    if (sink) {
+      sink_ = std::move(sink);
+    }
+    if (!sink_) {
+      sink_ = std::make_unique<StdOutSink>();
+    }
+
     this->runBackendThread();
 
     std::atexit([] {
@@ -45,12 +52,11 @@ void LoggerContext::stopBackendThread() {
   auto oldFlag = std::unique_ptr<std::once_flag>(startOnceFlag_.exchange(flag.release()));
 }
 
-void LoggerContext::backendWork() {
+void LoggerContext::runBackendWorkOnce() {
   // TODO:
   //  Need a buffer for serialization and data and reorder message according to timestamp before write
 
-  auto const sink = sink_.load(std::memory_order_acquire);
-  assert(sink.get() != nullptr);
+  auto const sink = sink_.get();
 
   auto doFlush = false;
   for (auto& queue : threadContextManager_.queues()) {
@@ -63,7 +69,7 @@ void LoggerContext::backendWork() {
         case EventType::LogRecord: {
           auto const logRecordHeader = Codec<LogRecordHeader>::decode(src);
           auto const metadata = Codec<RecordMetadata*>::decode(src);
-          this->processLogRecord(sink.get(), &logRecordHeader, metadata, src);
+          this->processLogRecord(sink, &logRecordHeader, metadata, src);
           doFlush = true;
         } break;
         case EventType::Close: {
@@ -106,7 +112,6 @@ void LoggerContext::processLogRecord(
   auto const message = std::string_view(formatBuffer_.data(), formatBuffer_.size());
 
   sink->write(*metadata->location, metadata->level, logRecordHeader->timestamp, logRecordHeader->threadID, message);
-  sink->flush();
 }
 
 void LoggerContext::runBackendThread() {
@@ -115,7 +120,7 @@ void LoggerContext::runBackendThread() {
 
     while (backendThreadRunning_.load(std::memory_order_relaxed)) {
       try {
-        this->backendWork();
+        this->runBackendWorkOnce();
       } catch (std::exception const& e) {
         fmt::print(stderr, "Logger backend thread error: {}\n", e.what());
       }
@@ -124,7 +129,7 @@ void LoggerContext::runBackendThread() {
   });
 
   try {
-    this->backendWork();
+    this->runBackendWorkOnce();
   } catch (std::exception const& e) {
     fmt::print(stderr, "Logger backend thread error: {}\n", e.what());
   }

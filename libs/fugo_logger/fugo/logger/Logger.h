@@ -63,24 +63,14 @@ FUGO_FORCE_INLINE void setLogLevel(std::string_view value) {
   throw std::invalid_argument("invalid log level string value");
 }
 
-/// Get sink
-FUGO_FORCE_INLINE auto sink() noexcept -> std::shared_ptr<Sink> {
-  return loggerContext()->sink();
-}
-
-/// Set sink
-FUGO_FORCE_INLINE void setSink(std::shared_ptr<Sink> const& sink) {
-  loggerContext()->setSink(sink);
-}
-
 /// Check backend thread running
 FUGO_FORCE_INLINE auto backendThreadRunning() noexcept -> bool {
   return loggerContext()->backendThreadRunning();
 }
 
 /// Start backend thread
-FUGO_FORCE_INLINE void startBackendThread() {
-  loggerContext()->startBackendThread();
+FUGO_FORCE_INLINE void startBackendThread(std::unique_ptr<Sink> sink = {}) {
+  loggerContext()->startBackendThread(std::move(sink));
 }
 
 /// Stop backend thread

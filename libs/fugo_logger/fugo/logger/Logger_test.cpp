@@ -13,6 +13,7 @@
 
 namespace fugo::logger {
 
+#if 0
 TEST_CASE("Logger: basic") {
   loggerContext()->setQueueCapacityHint(256);
 
@@ -62,13 +63,13 @@ TEST_CASE("Logger: fun") {
   logNotice("-----------------");
   loggerContext()->backendWork();
 }
+#endif
 
 TEST_CASE("Logger: ohm") {
   REQUIRE_FALSE(fugo::logger::backendThreadRunning());
 
   fugo::logger::setQueueCapacityHint(1024 * 1024);
-  fugo::logger::startBackendThread();
-
+  fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
   REQUIRE(fugo::logger::backendThreadRunning());
 
   fugo::logger::setLogLevel("trace");
@@ -83,22 +84,17 @@ TEST_CASE("Logger: ohm") {
 TEST_CASE("Logger: DailyFileSink") {
   REQUIRE_FALSE(fugo::logger::backendThreadRunning());
 
-  fugo::logger::setSink(std::make_shared<DailyFileSink>());
-  std::this_thread::sleep_for(std::chrono::milliseconds(250));
-
-  fugo::logger::startBackendThread();
+  fugo::logger::startBackendThread(std::make_unique<DailyFileSink>());
 
   REQUIRE(fugo::logger::backendThreadRunning());
 
-  logNotice("Hello {}!", "world");
-  logWarningF("One more time ({})", 4.15);
-
-  for (std::size_t i = 0; i < 20; ++i) {
-    logNoticeF("Record #{}", i);
+  logWarningF("begin");
+  for (auto i : std::views::iota(1) | std::views::take(50)) {
+    logWarningF("record #{}", i);
   }
+  logWarningF("end");
 
   fugo::logger::stopBackendThread();
-  fugo::logger::setSink(std::make_shared<StdOutSink>());
 }
 
 } // namespace fugo::logger

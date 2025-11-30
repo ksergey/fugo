@@ -23,12 +23,12 @@ private:
   ThreadContextManager threadContextManager_;
   // Current max verbosity level
   std::atomic<LogLevel> logLevel_{LogLevel::Notice};
-  // Sink
-  std::atomic<std::shared_ptr<Sink>> sink_;
   // Cache for message formatting
   fmt::memory_buffer formatBuffer_;
   // Guard for thread start
   std::atomic<std::once_flag*> startOnceFlag_;
+  // Sink
+  std::unique_ptr<Sink> sink_;
   // Backend thread
   std::jthread backendThread_;
   // Flag indicates backend thread is running
@@ -70,16 +70,6 @@ public:
     threadContextManager_.setQueueCapacityHint(value);
   }
 
-  /// Get current sink
-  [[nodiscard]] auto sink() const noexcept -> std::shared_ptr<Sink> {
-    return sink_.load(std::memory_order_relaxed);
-  }
-
-  /// Update sink
-  void setSink(std::shared_ptr<Sink> const& sink) {
-    sink_.store(sink, std::memory_order_release);
-  }
-
   /// Return thread context for current thread
   [[nodiscard]] auto currentThreadContext() noexcept -> ThreadContext* {
     static thread_local ThreadContext threadContext{threadContextManager_.createThreadContext()};
@@ -92,13 +82,10 @@ public:
   }
 
   /// Start backend background thread
-  void startBackendThread();
+  void startBackendThread(std::unique_ptr<Sink> sink);
 
   /// Stop backend background thread
   void stopBackendThread();
-
-  // TODO: make private
-  void backendWork();
 
 private:
   LoggerContext();
@@ -108,6 +95,7 @@ private:
       Sink* sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata, std::byte const* argsBuffer);
 
   void runBackendThread();
+  void runBackendWorkOnce();
 };
 
 /// Alias for LoggerContext::instance()
