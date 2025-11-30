@@ -68,6 +68,7 @@ auto BackendThread::processIncomingLogRecords(Sink& sink) -> std::size_t {
     auto doCloseQueue = false;
     while (true) {
       auto success = queue.dequeue([&](std::byte const* src) {
+        ++count;
         auto const event = Codec<RecordHeader>::decode(src);
 
         switch (event.type) {

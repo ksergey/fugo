@@ -4,51 +4,13 @@
 #pragma once
 
 #include <ranges>
-#include <thread>
 #include <vector>
 
-#include <fugo/core/Platform.h>
 #include <fugo/core/SpinLock.h>
 
-#include "Queue.h"
+#include "ThreadContext.h"
 
 namespace fugo::logger {
-
-class ThreadContext {
-private:
-  Queue::Producer producer_;
-  std::thread::id threadID_ = std::this_thread::get_id();
-
-public:
-  ThreadContext(ThreadContext const&) = delete;
-  ThreadContext& operator=(ThreadContext const&) = delete;
-  ThreadContext(ThreadContext&&) = default;
-  ThreadContext& operator=(ThreadContext&&) = default;
-
-  ThreadContext() = default;
-
-  /// Constructor
-  explicit ThreadContext(Queue::Producer producer) noexcept : producer_(std::move(producer)) {
-    assert(producer_);
-  }
-
-  /// Destructor
-  ~ThreadContext() {
-    if (producer_) {
-      producer_.close();
-    }
-  }
-
-  /// Get producer for queue
-  [[nodiscard]] FUGO_FORCE_INLINE auto producer() noexcept -> Queue::Producer& {
-    return producer_;
-  }
-
-  /// Get thread id
-  [[nodiscard]] FUGO_FORCE_INLINE auto threadID() const noexcept -> std::thread::id {
-    return threadID_;
-  }
-};
 
 class ThreadContextManager {
 private:
