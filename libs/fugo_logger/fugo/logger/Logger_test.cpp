@@ -68,11 +68,11 @@ TEST_CASE("Logger: fun") {
 TEST_CASE("Logger: ohm") {
   REQUIRE_FALSE(fugo::logger::isBackendThreadRunning());
 
+  fugo::logger::setLogLevel("trace");
   fugo::logger::setQueueCapacityHint(1024 * 1024);
+
   fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
   REQUIRE(fugo::logger::isBackendThreadRunning());
-
-  fugo::logger::setLogLevel("trace");
 
   REQUIRE_EQ(fugo::logger::logLevel(), LogLevel::Trace);
 

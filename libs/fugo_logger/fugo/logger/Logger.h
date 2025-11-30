@@ -12,10 +12,6 @@
 #include "Runtime.h"
 #include "Transform.h"
 
-// TODO:
-//  - add more macros (log once per ...)
-//  - daily roation sink
-
 namespace fugo::logger {
 
 namespace detail {
