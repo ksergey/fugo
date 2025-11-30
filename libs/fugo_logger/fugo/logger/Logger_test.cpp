@@ -75,8 +75,7 @@ TEST_CASE("Logger: ohm") {
 
   logNotice("Hello {}!", "world");
 
-  // loggerContext()->stopBackendThread();
-  // loggerContext()->startBackendThread();
+  fugo::logger::stopBackendThread();
 }
 
 } // namespace fugo::logger

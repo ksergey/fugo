@@ -16,7 +16,7 @@ namespace fugo::logger {
 
 class ThreadContext {
 private:
-  alignas(kHardwareDestructiveInterferenceSize) Queue::Producer producer_;
+  Queue::Producer producer_;
   std::thread::id threadID_ = std::this_thread::get_id();
 
 public:

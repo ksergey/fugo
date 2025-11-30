@@ -11,15 +11,6 @@
 #include <fmt/std.h>
 
 namespace fugo::logger {
-namespace {
-
-// Wrapper around localtime_r
-auto localtime(std::time_t time) noexcept -> ::tm {
-  ::tm tm;
-  return *::localtime_r(&time, &tm);
-}
-
-} // namespace
 
 void StdOutSink::write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
     std::thread::id const& threadID, std::string_view message) {
@@ -33,16 +24,9 @@ void StdOutSink::write(std::source_location const& location, LogLevel level, ::t
     return fmt::text_style();
   }();
 
-  // Format timestamp
-  char buffer[30];
-  auto const result =
-      fmt::format_to_n(buffer, sizeof(buffer), "{:%F %T}.{:09}", localtime(timestamp.tv_sec), timestamp.tv_nsec);
-  auto const timestampStr = std::string_view(buffer, result.size);
+  auto const data = formatter_(location, level, timestamp, threadID, message);
 
-  fmt::print(style, fmt::runtime(pattern_), fmt::arg("timestamp", timestampStr), fmt::arg("threadID", threadID),
-      fmt::arg("level", toShortString(level)), fmt::arg("message", message), fmt::arg("file", location.file_name()),
-      fmt::arg("line", location.line()));
-  fmt::print("\n");
+  fmt::print(style, "{}\n", data);
 }
 
 void StdOutSink::flush() {

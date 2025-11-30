@@ -3,18 +3,27 @@
 
 #pragma once
 
+#include <filesystem>
+
+#include <fugo/core/FileStream.h>
+
 #include "Sink.h"
 
 namespace fugo::logger {
 
-class StdOutSink final : public Sink {
+class DailyFileSink final : public Sink {
 private:
+  std::filesystem::path destination_;
+  std::string prefix_;
+  FileStream stream_;
   PatternFormatter formatter_;
 
 public:
-  StdOutSink(StdOutSink const&) = delete;
-  StdOutSink& operator=(StdOutSink const&) = delete;
-  StdOutSink() = default;
+  DailyFileSink(DailyFileSink const&) = delete;
+  DailyFileSink& operator=(DailyFileSink const&) = delete;
+
+  DailyFileSink(
+      std::filesystem::path const& destination = std::filesystem::current_path(), std::string prefix = std::string());
 
   /// Formatting pattern
   [[nodiscard]] auto pattern() const noexcept -> std::string const& {

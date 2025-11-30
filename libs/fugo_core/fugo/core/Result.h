@@ -17,6 +17,9 @@ using turboq::success;
 /// @see <turboq/Result.h>
 using turboq::makePosixErrorCode;
 
+/// @see <turboq/Result.h>
+using turboq::getPosixErrorCategory;
+
 } // namespace core
 
 using namespace ::fugo::core;
