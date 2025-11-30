@@ -7,7 +7,9 @@
 #include <ranges>
 #include <thread>
 
+#include "DailyFileSink.h"
 #include "Logger.h"
+#include "StdOutSink.h"
 
 namespace fugo::logger {
 
@@ -76,6 +78,27 @@ TEST_CASE("Logger: ohm") {
   logNotice("Hello {}!", "world");
 
   fugo::logger::stopBackendThread();
+}
+
+TEST_CASE("Logger: DailyFileSink") {
+  REQUIRE_FALSE(fugo::logger::backendThreadRunning());
+
+  fugo::logger::setSink(std::make_shared<DailyFileSink>());
+  std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+  fugo::logger::startBackendThread();
+
+  REQUIRE(fugo::logger::backendThreadRunning());
+
+  logNotice("Hello {}!", "world");
+  logWarningF("One more time ({})", 4.15);
+
+  for (std::size_t i = 0; i < 20; ++i) {
+    logNoticeF("Record #{}", i);
+  }
+
+  fugo::logger::stopBackendThread();
+  fugo::logger::setSink(std::make_shared<StdOutSink>());
 }
 
 } // namespace fugo::logger

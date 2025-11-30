@@ -24,9 +24,8 @@ void StdOutSink::write(std::source_location const& location, LogLevel level, ::t
     return fmt::text_style();
   }();
 
-  auto const data = formatter_(location, level, timestamp, threadID, message);
-
-  fmt::print(style, "{}\n", data);
+  auto const formattedMessage = formatter_(location, level, timestamp, threadID, message);
+  fmt::print(style, "{}\n", formattedMessage);
 }
 
 void StdOutSink::flush() {

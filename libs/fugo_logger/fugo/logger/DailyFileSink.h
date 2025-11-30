@@ -15,8 +15,9 @@ class DailyFileSink final : public Sink {
 private:
   std::filesystem::path destination_;
   std::string prefix_;
-  FileStream stream_;
+  FileStream fileStream_;
   PatternFormatter formatter_;
+  std::time_t nextRotateTime_ = 0;
 
 public:
   DailyFileSink(DailyFileSink const&) = delete;
@@ -39,6 +40,9 @@ public:
       std::thread::id const& threadID, std::string_view message) override;
 
   void flush() override;
+
+private:
+  [[nodiscard]] auto reopen(std::time_t now) -> bool;
 };
 
 } // namespace fugo::logger
