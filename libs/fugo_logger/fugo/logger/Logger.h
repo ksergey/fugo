@@ -8,8 +8,8 @@
 #include <fmt/format.h>
 
 #include "Codec.h"
-#include "LoggerContext.h"
 #include "Macro.h"
+#include "Runtime.h"
 #include "Transform.h"
 
 // TODO:
@@ -30,17 +30,17 @@ constexpr void decodeFormatArgs(
 
 /// Set queue capacity hint
 FUGO_FORCE_INLINE void setQueueCapacityHint(std::size_t sizeHint) {
-  loggerContext()->setQueueCapacityHint(sizeHint);
+  runtime().setQueueCapacityHint(sizeHint);
 }
 
 /// Log verbosity level
 FUGO_FORCE_INLINE auto logLevel() noexcept -> LogLevel {
-  return loggerContext()->logLevel();
+  return runtime().logLevel();
 }
 
 /// Set log verbosity level
 FUGO_FORCE_INLINE void setLogLevel(LogLevel value) {
-  loggerContext()->setLogLevel(value);
+  runtime().setLogLevel(value);
 }
 
 /// Set log verbosity level from string value
@@ -49,33 +49,33 @@ FUGO_FORCE_INLINE void setLogLevel(std::string_view value) {
   using namespace std::string_view_literals;
 
   if (value == "error"sv) {
-    return loggerContext()->setLogLevel(LogLevel::Error);
+    return runtime().setLogLevel(LogLevel::Error);
   } else if (value == "warning"sv) {
-    return loggerContext()->setLogLevel(LogLevel::Warning);
+    return runtime().setLogLevel(LogLevel::Warning);
   } else if (value == "notice"sv) {
-    return loggerContext()->setLogLevel(LogLevel::Notice);
+    return runtime().setLogLevel(LogLevel::Notice);
   } else if (value == "debug"sv) {
-    return loggerContext()->setLogLevel(LogLevel::Debug);
+    return runtime().setLogLevel(LogLevel::Debug);
   } else if (value == "trace"sv) {
-    return loggerContext()->setLogLevel(LogLevel::Trace);
+    return runtime().setLogLevel(LogLevel::Trace);
   }
 
   throw std::invalid_argument("invalid log level string value");
 }
 
 /// Check backend thread running
-FUGO_FORCE_INLINE auto backendThreadRunning() noexcept -> bool {
-  return loggerContext()->backendThreadRunning();
+FUGO_FORCE_INLINE auto isBackendThreadRunning() noexcept -> bool {
+  return runtime().isBackendThreadRunning();
 }
 
 /// Start backend thread
 FUGO_FORCE_INLINE void startBackendThread(std::unique_ptr<Sink> sink = {}) {
-  loggerContext()->startBackendThread(std::move(sink));
+  runtime().startBackendThread(std::move(sink));
 }
 
 /// Stop backend thread
 FUGO_FORCE_INLINE void stopBackendThread() {
-  loggerContext()->stopBackendThread();
+  runtime().stopBackendThread();
 }
 
 /// Log statement handler
@@ -104,12 +104,13 @@ FUGO_FORCE_INLINE void logStatement(Args const&... args) {
 
   constexpr auto kEnqueuePolicy = (kFlagRety == (meta.flags & kFlagRety)) ? EnqueuePolicy::Retry : EnqueuePolicy::Drop;
 
-  loggerContext()->currentThreadContext()->producer().enqueue<kEnqueuePolicy>(bufferSize, [&](std::byte* dst) noexcept {
+  auto& threadContext = runtime().localThreadContext();
+
+  threadContext.producer().enqueue<kEnqueuePolicy>(bufferSize, [&](std::byte* dst) noexcept {
     // RecordHeader
     Codec<RecordHeader>::encode(dst, RecordHeader{.type = EventType::LogRecord});
     // LogRecordHeader
-    Codec<LogRecordHeader>::encode(
-        dst, LogRecordHeader{.timestamp = now, .threadID = loggerContext()->currentThreadContext()->threadID()});
+    Codec<LogRecordHeader>::encode(dst, LogRecordHeader{.timestamp = now, .threadID = threadContext.threadID()});
     // RecordMetadata
     Codec<RecordMetadata const*>::encode(dst, &meta);
     // Args...

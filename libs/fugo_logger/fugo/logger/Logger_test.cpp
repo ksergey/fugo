@@ -66,11 +66,11 @@ TEST_CASE("Logger: fun") {
 #endif
 
 TEST_CASE("Logger: ohm") {
-  REQUIRE_FALSE(fugo::logger::backendThreadRunning());
+  REQUIRE_FALSE(fugo::logger::isBackendThreadRunning());
 
   fugo::logger::setQueueCapacityHint(1024 * 1024);
   fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
-  REQUIRE(fugo::logger::backendThreadRunning());
+  REQUIRE(fugo::logger::isBackendThreadRunning());
 
   fugo::logger::setLogLevel("trace");
 
@@ -82,11 +82,11 @@ TEST_CASE("Logger: ohm") {
 }
 
 TEST_CASE("Logger: DailyFileSink") {
-  REQUIRE_FALSE(fugo::logger::backendThreadRunning());
+  REQUIRE_FALSE(fugo::logger::isBackendThreadRunning());
 
   fugo::logger::startBackendThread(std::make_unique<DailyFileSink>());
 
-  REQUIRE(fugo::logger::backendThreadRunning());
+  REQUIRE(fugo::logger::isBackendThreadRunning());
 
   logWarningF("begin");
   for (auto i : std::views::iota(1) | std::views::take(50)) {
