@@ -61,7 +61,7 @@ public:
 
   /// Return true on backend thread running
   [[nodiscard]] FUGO_FORCE_INLINE auto isBackendThreadRunning() const noexcept -> bool {
-    return backendThread_.running();
+    return backendThread_.isRunning();
   }
 
   /// Start backend thread

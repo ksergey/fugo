@@ -66,27 +66,27 @@ TEST_CASE("Logger: fun") {
 #endif
 
 TEST_CASE("Logger: ohm") {
-  REQUIRE_FALSE(fugo::logger::isBackendThreadRunning());
+  REQUIRE_FALSE(fugo::logger::backend().isReady());
 
   fugo::logger::setLogLevel("trace");
-  fugo::logger::setQueueCapacityHint(1024 * 1024);
+  // fugo::logger::setQueueCapacityHint(1024 * 1024);
 
-  fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
-  REQUIRE(fugo::logger::isBackendThreadRunning());
+  fugo::logger::backend().start(std::make_unique<StdOutSink>());
+  // fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
+  REQUIRE(fugo::logger::backend().isReady());
 
-  REQUIRE_EQ(fugo::logger::logLevel(), LogLevel::Trace);
+  REQUIRE_EQ(fugo::logger::backend().logLevel(), LogLevel::Trace);
 
   logNotice("Hello {}!", "world");
 
-  fugo::logger::stopBackendThread();
+  fugo::logger::backend().stop();
 }
 
 TEST_CASE("Logger: DailyFileSink") {
-  REQUIRE_FALSE(fugo::logger::isBackendThreadRunning());
+  REQUIRE_FALSE(fugo::logger::backend().isReady());
 
-  fugo::logger::startBackendThread(std::make_unique<DailyFileSink>());
-
-  REQUIRE(fugo::logger::isBackendThreadRunning());
+  fugo::logger::backend().start(std::make_unique<DailyFileSink>());
+  REQUIRE(fugo::logger::backend().isReady());
 
   logWarningF("begin");
   for (auto i : std::views::iota(1) | std::views::take(50)) {
@@ -94,7 +94,7 @@ TEST_CASE("Logger: DailyFileSink") {
   }
   logWarningF("end");
 
-  fugo::logger::stopBackendThread();
+  fugo::logger::backend().stop();
 }
 
 } // namespace fugo::logger

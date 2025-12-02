@@ -37,6 +37,9 @@ struct Queue {
     [[nodiscard]] auto closed() const noexcept -> bool {
       return static_cast<bool>(*this) == false;
     }
+    [[nodiscard]] auto isClosed() const noexcept -> bool {
+      return static_cast<bool>(*this) == false;
+    }
 
     /// Close producer side and notify consumer side
     void close() {
@@ -49,6 +52,7 @@ struct Queue {
       *this = {};
     }
 
+    // TODO: OverflowPolicy
     /// Enqueue a data into queue
     template <EnqueuePolicy Policy = EnqueuePolicy::Drop, typename Fn>
     FUGO_FORCE_INLINE auto enqueue(std::size_t size, Fn&& fn) -> bool {
@@ -84,6 +88,9 @@ struct Queue {
 
     /// Return true on consumer side closed
     [[nodiscard]] auto closed() const noexcept -> bool {
+      return static_cast<bool>(*this) == false;
+    }
+    [[nodiscard]] auto isClosed() const noexcept -> bool {
       return static_cast<bool>(*this) == false;
     }
 

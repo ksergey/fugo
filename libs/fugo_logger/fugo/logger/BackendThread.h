@@ -24,8 +24,6 @@ private:
   std::atomic<bool> running_{false};
   // Cache for message formatting
   fmt::memory_buffer formatBuffer_;
-  // Guard for thread start
-  std::atomic<std::once_flag*> startOnceFlag_;
 
 public:
   BackendThread(BackendThread const&) = delete;
@@ -35,7 +33,7 @@ public:
   ~BackendThread();
 
   /// Return true on backend thread running
-  [[nodiscard]] FUGO_FORCE_INLINE auto running() const noexcept {
+  [[nodiscard]] FUGO_FORCE_INLINE auto isRunning() const noexcept {
     return running_.load(std::memory_order_acquire);
   }
 
