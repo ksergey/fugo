@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <cassert>
+#include <optional>
 #include <ranges>
 #include <vector>
 
@@ -23,10 +24,10 @@ class QueueManager final {
 private:
   std::vector<Queue::Consumer> queues_;
   std::vector<Queue::Consumer> pendingAddQueues_;
-  std::vector<Queue::Consumer*> cachedQueues_;
+  SpinLock pendingAddQueuesLock_;
+  std::atomic<bool> rebuildQueuesFlag_{false};
+  // Capacity for a new queues
   std::atomic<std::size_t> queueCapacityHint_{kDefaultCapacityHint};
-  std::atomic<bool> rebuildQueuesCacheFlag_{false};
-  SpinLock lock_;
 
 public:
   [[nodiscard]] static auto instance() -> QueueManager* {
@@ -50,33 +51,35 @@ public:
     queueCapacityHint_.store(value, std::memory_order_relaxed);
   }
 
-  /// Create producer
-  [[nodiscard]] auto createProducer() noexcept -> Queue::Producer;
+  /// Create producer with default (or requested) capacity hint
+  [[nodiscard]] auto createProducer(std::optional<std::size_t> capacityHint = {}) noexcept -> Queue::Producer;
 
+  /// Iterate over active queues
+  /// Non-thread safe
   template <typename Fn>
     requires std::invocable<Fn, Queue::Consumer*>
   void forEachConsumer(Fn&& fn) {
-    if (rebuildQueuesCacheFlag_.load(std::memory_order_relaxed)) [[unlikely]] {
-      this->rebuildQueuesCache();
-      rebuildQueuesCacheFlag_.store(false, std::memory_order_relaxed);
+    if (rebuildQueuesFlag_.load(std::memory_order_relaxed)) [[unlikely]] {
+      this->rebuildQueues();
+      rebuildQueuesFlag_.store(false, std::memory_order_relaxed);
     }
-    for (auto const consumer : cachedQueues_) {
-      assert(!consumer->isClosed());
-      std::invoke(std::forward<Fn>(fn), consumer);
-      if (consumer->isClosed()) [[unlikely]] {
-        this->notifyRebuildQueuesCache();
-      }
+
+    bool atLeastOneQueueClosed{false};
+    for (auto& consumer : queues_) {
+      assert(!consumer.isClosed());
+      std::invoke(std::forward<Fn>(fn), &consumer);
+      atLeastOneQueueClosed = atLeastOneQueueClosed || consumer.isClosed();
+    }
+
+    if (atLeastOneQueueClosed) {
+      rebuildQueuesFlag_.store(true, std::memory_order_relaxed);
     }
   }
 
 private:
   QueueManager() = default;
 
-  void notifyRebuildQueuesCache() noexcept {
-    rebuildQueuesCacheFlag_.store(true, std::memory_order_relaxed);
-  }
-
-  void rebuildQueuesCache();
+  void rebuildQueues();
 };
 
 } // namespace fugo::logger

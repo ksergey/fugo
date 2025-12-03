@@ -7,41 +7,39 @@
 
 namespace fugo::logger {
 
-auto QueueManager::createProducer() noexcept -> Queue::Producer {
-  auto [producer, consumer] = Queue::createProducerAndConsumer("logger-queue", this->queueCapacityHint());
+auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexcept -> Queue::Producer {
+  if (!capacityHint) {
+    capacityHint = this->queueCapacityHint();
+  }
+
+  auto [producer, consumer] = Queue::createProducerAndConsumer("logger-queue", *capacityHint);
   if (!producer || !consumer) {
     return {};
   }
 
   {
-    std::lock_guard guard(lock_);
+    std::lock_guard guard(pendingAddQueuesLock_);
     pendingAddQueues_.push_back(std::move(consumer));
-    this->notifyRebuildQueuesCache();
+    rebuildQueuesFlag_.store(true, std::memory_order_relaxed);
   }
 
   return producer;
 }
 
-void QueueManager::rebuildQueuesCache() {
-  std::lock_guard guard(lock_);
-
+void QueueManager::rebuildQueues() {
   // Drop closed queues
   std::erase_if(queues_, [](Queue::Consumer const& consumer) {
     return consumer.closed();
   });
 
   // Add pending queues
+  std::lock_guard guard(pendingAddQueuesLock_);
   if (!pendingAddQueues_.empty()) {
     for (Queue::Consumer& consumer : pendingAddQueues_) {
       queues_.push_back(std::move(consumer));
     }
     pendingAddQueues_.clear();
   }
-
-  cachedQueues_.resize(queues_.size());
-  std::ranges::transform(queues_, cachedQueues_.begin(), [](Queue::Consumer& consumer) {
-    return &consumer;
-  });
 }
 
 } // namespace fugo::logger
