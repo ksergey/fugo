@@ -10,14 +10,15 @@
 
 #include <fmt/format.h>
 
+#include "BackendOptions.h"
+#include "QueueManager.h"
 #include "Sink.h"
-#include "ThreadContextManager.h"
 
 namespace fugo::logger {
 
 class BackendThread final {
 private:
-  ThreadContextManager& threadContextManager_;
+  QueueManager& queueManager_;
   // Backend thread
   std::jthread thread_;
   // Flag indicates backend thread running
@@ -29,7 +30,10 @@ public:
   BackendThread(BackendThread const&) = delete;
   BackendThread& operator=(BackendThread const&) = delete;
 
-  BackendThread(ThreadContextManager& threadContextManager);
+  /// Constructor
+  explicit BackendThread(QueueManager& queueManager);
+
+  /// Destructor
   ~BackendThread();
 
   /// Return true on backend thread running
@@ -38,7 +42,7 @@ public:
   }
 
   /// Start backend thread
-  void start(std::unique_ptr<Sink> sink);
+  void start(std::unique_ptr<Sink> sink, BackendOptions const& options);
 
   /// Stop backend thread
   void stop();

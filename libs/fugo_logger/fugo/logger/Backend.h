@@ -13,17 +13,16 @@
 #include "BackendThread.h"
 #include "Common.h"
 #include "Sink.h"
-#include "ThreadContextManager.h"
+#include "ThreadContext.h"
 
 namespace fugo::logger {
 
 class Backend {
 private:
-  alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_ = LogLevel::Notice;
-  BackendOptions options_;
+  alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
   std::once_flag shutdownHandlesInstalledFlag_;
-  ThreadContextManager threadContextManager_;
-  BackendThread backendThread_{threadContextManager_};
+  QueueManager queueManager_;
+  BackendThread backendThread_{queueManager_};
   std::mutex backendThreadMutex_;
 
 public:
@@ -50,9 +49,19 @@ public:
     return value <= this->logLevel();
   }
 
+  /// Queue capacity hint
+  [[nodiscard]] FUGO_FORCE_INLINE auto queueCapacityHint() const noexcept -> std::size_t {
+    return queueManager_.queueCapacityHint();
+  }
+
+  /// Change queue capacity hint
+  void setQueueCapacityHint(std::size_t value) {
+    queueManager_.setQueueCapacityHint(value);
+  }
+
   /// Get ThreadContext for current thread
   [[nodiscard]] FUGO_FORCE_INLINE auto localThreadContext() noexcept -> ThreadContext* {
-    static thread_local auto threadContext = threadContextManager_.createThreadContext();
+    static thread_local auto threadContext = ThreadContext{queueManager_};
     return &threadContext;
   }
 
@@ -62,7 +71,7 @@ public:
   }
 
   /// Start backend thread
-  void start(std::unique_ptr<Sink> sink);
+  void start(std::unique_ptr<Sink> sink, BackendOptions const& options);
 
   /// Stop backend thread
   void stop();

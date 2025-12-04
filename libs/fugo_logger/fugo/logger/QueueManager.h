@@ -30,13 +30,10 @@ private:
   std::atomic<std::size_t> queueCapacityHint_{kDefaultCapacityHint};
 
 public:
-  [[nodiscard]] static auto instance() -> QueueManager* {
-    static QueueManager instance;
-    return &instance;
-  }
-
   QueueManager(QueueManager const&) = delete;
   QueueManager& operator=(QueueManager const&) = delete;
+
+  QueueManager() = default;
 
   [[nodiscard]] auto queueCapacityHint() const noexcept -> std::size_t {
     return queueCapacityHint_.load(std::memory_order_relaxed);
@@ -77,8 +74,6 @@ public:
   }
 
 private:
-  QueueManager() = default;
-
   void rebuildQueues();
 };
 

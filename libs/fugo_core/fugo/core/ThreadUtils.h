@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "Result.h"
@@ -15,6 +16,9 @@ auto getThisThreadName() -> Result<std::string>;
 
 /// Set name of the thread
 auto setThisThreadName(std::string const& value) -> Result<>;
+
+/// Pin current thread to specified core number
+auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> Result<>;
 
 } // namespace core
 

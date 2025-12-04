@@ -13,80 +13,26 @@
 
 namespace fugo::logger {
 
-#if 0
-TEST_CASE("Logger: basic") {
-  loggerContext()->setQueueCapacityHint(256);
-
-  auto thread = std::jthread([] {
-    logWarningF("begin");
-    for (auto i : std::views::iota(1) | std::views::take(50)) {
-      logWarningF("record #{}", i);
-    }
-    logWarningF("end");
-  });
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  loggerContext()->backendWork();
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(250));
-  loggerContext()->backendWork();
-
-  thread.join();
-}
-
-TEST_CASE("Logger: fun") {
-  loggerContext()->setQueueCapacityHint(1024 * 1024 * 10);
-
-  std::jthread([] {
-    logWarning("This is warning ({})", 7782);
-  }).join();
-
-  logError("Hello {}", "world");
-  logNotice("Hello {} {}", 512, 3.14);
-
-  auto thread1 = std::jthread([] {
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    logNotice("hello world");
-  });
-
-  auto thread2 = std::jthread([] {
-    logNotice("sweet dreams are made of {}", "this");
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));
-  });
-
-  logNotice("-----------------");
-  loggerContext()->backendWork();
-
-  thread1.join();
-  thread2.join();
-
-  logNotice("-----------------");
-  loggerContext()->backendWork();
-}
-#endif
-
 TEST_CASE("Logger: ohm") {
-  REQUIRE_FALSE(fugo::logger::backend().isReady());
+  REQUIRE_FALSE(fugo::logger::isBackendReady());
 
   fugo::logger::setLogLevel("trace");
-  // fugo::logger::setQueueCapacityHint(1024 * 1024);
 
-  fugo::logger::backend().start(std::make_unique<StdOutSink>());
-  // fugo::logger::startBackendThread(std::make_unique<StdOutSink>());
-  REQUIRE(fugo::logger::backend().isReady());
+  fugo::logger::startBackend(std::make_unique<StdOutSink>());
+  REQUIRE(fugo::logger::isBackendReady());
 
-  REQUIRE_EQ(fugo::logger::backend().logLevel(), LogLevel::Trace);
+  REQUIRE_EQ(fugo::logger::logLevel(), LogLevel::Trace);
 
   logNotice("Hello {}!", "world");
 
-  fugo::logger::backend().stop();
+  fugo::logger::stopBackend();
 }
 
 TEST_CASE("Logger: DailyFileSink") {
-  REQUIRE_FALSE(fugo::logger::backend().isReady());
+  REQUIRE_FALSE(fugo::logger::isBackendReady());
 
-  fugo::logger::backend().start(std::make_unique<DailyFileSink>());
-  REQUIRE(fugo::logger::backend().isReady());
+  fugo::logger::startBackend(std::make_unique<DailyFileSink>());
+  REQUIRE(fugo::logger::isBackendReady());
 
   logWarningF("begin");
   for (auto i : std::views::iota(1) | std::views::take(50)) {
@@ -94,7 +40,7 @@ TEST_CASE("Logger: DailyFileSink") {
   }
   logWarningF("end");
 
-  fugo::logger::backend().stop();
+  fugo::logger::stopBackend();
 }
 
 } // namespace fugo::logger

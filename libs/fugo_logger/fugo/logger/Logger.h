@@ -24,11 +24,6 @@ constexpr void decodeFormatArgs(
 
 } // namespace detail
 
-// /// Set queue capacity hint
-// FUGO_FORCE_INLINE void setQueueCapacityHint(std::size_t sizeHint) {
-//   backend().setQueueCapacityHint(sizeHint);
-// }
-
 /// Log verbosity level
 FUGO_FORCE_INLINE auto logLevel() noexcept -> LogLevel {
   return backend().logLevel();
@@ -59,14 +54,24 @@ FUGO_FORCE_INLINE void setLogLevel(std::string_view value) {
   throw std::invalid_argument("invalid log level string value");
 }
 
+/// Queue capacity hint
+[[nodiscard]] FUGO_FORCE_INLINE auto queueCapacityHint() noexcept -> std::size_t {
+  return backend().queueCapacityHint();
+}
+
+/// Set queue capacity hint
+FUGO_FORCE_INLINE void setQueueCapacityHint(std::size_t sizeHint) {
+  backend().setQueueCapacityHint(sizeHint);
+}
+
 /// Check backend thread running
 FUGO_FORCE_INLINE auto isBackendReady() noexcept -> bool {
   return backend().isReady();
 }
 
 /// Start backend thread
-FUGO_FORCE_INLINE void startBackend(std::unique_ptr<Sink> sink = {}) {
-  backend().start(std::move(sink));
+FUGO_FORCE_INLINE void startBackend(std::unique_ptr<Sink> sink = {}, BackendOptions const& options = {}) {
+  backend().start(std::move(sink), options);
 }
 
 /// Stop backend thread

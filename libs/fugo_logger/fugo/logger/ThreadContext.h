@@ -8,13 +8,14 @@
 #include <fugo/core/Platform.h>
 
 #include "Queue.h"
+#include "QueueManager.h"
 
 namespace fugo::logger {
 
-class ThreadContext {
+class ThreadContext final {
 private:
   Queue::Producer producer_;
-  std::thread::id threadID_ = std::this_thread::get_id();
+  std::thread::id threadID_;
 
 public:
   ThreadContext(ThreadContext const&) = delete;
@@ -22,12 +23,9 @@ public:
   ThreadContext(ThreadContext&&) = default;
   ThreadContext& operator=(ThreadContext&&) = default;
 
-  ThreadContext() = default;
-
   /// Constructor
-  explicit ThreadContext(Queue::Producer producer) noexcept : producer_(std::move(producer)) {
-    assert(producer_);
-  }
+  ThreadContext(QueueManager& queueManager) noexcept
+      : producer_{queueManager.createProducer()}, threadID_{std::this_thread::get_id()} {}
 
   /// Destructor
   ~ThreadContext() {

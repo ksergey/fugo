@@ -39,9 +39,9 @@ void failureSignalHandler(
     return sigInfo.sigNo == sigNo;
   });
   if (found != kFailureSignals.end()) {
-    fmt::print(stderr, "catched signal {}\n", found->sigName);
+    fmt::print(stderr, "Catched signal {}\n", found->sigName);
   } else {
-    fmt::print(stderr, "catched signal no {}\n", sigNo);
+    fmt::print(stderr, "Catched signal no {}\n", sigNo);
   }
 
   if (!threadShouldExit()) {
@@ -56,7 +56,7 @@ void installAtExitHandler() noexcept {
     Backend::instance().stop();
   });
   if (rc != 0) {
-    fmt::print(stderr, "can't install at-exit handler\n");
+    fmt::print(stderr, "Can't install at-exit handler\n");
   }
 }
 
@@ -67,14 +67,14 @@ void installFailureSignalHandler() noexcept {
   sa.sa_sigaction = &failureSignalHandler;
   for (auto const& sigInfo : kFailureSignals) {
     if (auto const rc = ::sigaction(sigInfo.sigNo, &sa, nullptr); rc == -1) {
-      fmt::print(stderr, "can't install signal handler for {} signal\n", sigInfo.sigName);
+      fmt::print(stderr, "Can't install signal handler for {} signal\n", sigInfo.sigName);
     }
   }
 }
 
 } // namespace
 
-void Backend::start(std::unique_ptr<Sink> sink) {
+void Backend::start(std::unique_ptr<Sink> sink, BackendOptions const& options) {
   std::lock_guard guard{backendThreadMutex_};
 
   std::call_once(shutdownHandlesInstalledFlag_, [] {
@@ -82,7 +82,7 @@ void Backend::start(std::unique_ptr<Sink> sink) {
     installFailureSignalHandler();
   });
 
-  backendThread_.start(std::move(sink));
+  backendThread_.start(std::move(sink), options);
 }
 
 void Backend::stop() {
