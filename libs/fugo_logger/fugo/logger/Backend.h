@@ -1,0 +1,87 @@
+// Copyright (c) Sergey Kovalevich <inndie@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0
+
+#pragma once
+
+#include <atomic>
+#include <memory>
+#include <mutex>
+
+#include <fugo/core/Platform.h>
+
+#include "BackendOptions.h"
+#include "BackendThread.h"
+#include "Common.h"
+#include "Sink.h"
+#include "ThreadContext.h"
+
+namespace fugo::logger {
+
+class Backend {
+private:
+  alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
+  std::once_flag shutdownHandlesInstalledFlag_;
+  QueueManager queueManager_;
+  BackendThread backendThread_{queueManager_};
+  std::mutex backendThreadMutex_;
+
+public:
+  [[nodiscard]] FUGO_FORCE_INLINE static auto instance() -> Backend& {
+    static Backend instance;
+    return instance;
+  }
+
+  Backend(Backend const&) = delete;
+  Backend& operator=(Backend const&) = delete;
+
+  /// Current log verbosity level
+  [[nodiscard]] FUGO_FORCE_INLINE auto logLevel() const noexcept {
+    return logLevel_.load(std::memory_order_relaxed);
+  }
+
+  /// Change log verbosity level
+  FUGO_FORCE_INLINE void setLogLevel(LogLevel value) noexcept {
+    logLevel_.store(value, std::memory_order_relaxed);
+  }
+
+  /// Return true on message with log verbosity value @c value should be logged
+  [[nodiscard]] FUGO_FORCE_INLINE auto shouldLog(LogLevel value) const noexcept {
+    return value <= this->logLevel();
+  }
+
+  /// Queue capacity hint
+  [[nodiscard]] FUGO_FORCE_INLINE auto queueCapacityHint() const noexcept -> std::size_t {
+    return queueManager_.queueCapacityHint();
+  }
+
+  /// Change queue capacity hint
+  void setQueueCapacityHint(std::size_t value) {
+    queueManager_.setQueueCapacityHint(value);
+  }
+
+  /// Get ThreadContext for current thread
+  [[nodiscard]] FUGO_FORCE_INLINE auto localThreadContext() noexcept -> ThreadContext* {
+    static thread_local auto threadContext = ThreadContext{queueManager_};
+    return &threadContext;
+  }
+
+  /// Return true on backend ready to process log records
+  [[nodiscard]] FUGO_FORCE_INLINE auto isReady() const noexcept {
+    return backendThread_.isRunning();
+  }
+
+  /// Start backend thread
+  void start(std::unique_ptr<Sink> sink, BackendOptions const& options);
+
+  /// Stop backend thread
+  void stop();
+
+private:
+  Backend() = default;
+};
+
+[[nodiscard]] FUGO_FORCE_INLINE auto backend() -> Backend& {
+  return Backend::instance();
+}
+
+} // namespace fugo::logger

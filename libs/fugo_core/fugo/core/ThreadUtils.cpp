@@ -28,5 +28,16 @@ auto setThisThreadName(std::string const& value) -> Result<> {
   return success();
 }
 
+auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> Result<> {
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  CPU_SET(coreNo, &cpuset);
+
+  if (auto const rc = ::pthread_setaffinity_np(::pthread_self(), sizeof(cpuset), &cpuset); rc != 0) {
+    return {makePosixErrorCode(errno)};
+  }
+  return success();
+}
+
 } // namespace core
 } // namespace fugo
