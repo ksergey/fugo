@@ -23,7 +23,7 @@ auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexc
     rebuildQueuesFlag_.store(true, std::memory_order_relaxed);
   }
 
-  return producer;
+  return std::move(producer);
 }
 
 void QueueManager::rebuildQueues() {

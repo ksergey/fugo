@@ -52,7 +52,6 @@ struct Queue {
       *this = {};
     }
 
-    // TODO: OverflowPolicy
     /// Enqueue a data into queue
     template <EnqueuePolicy Policy = EnqueuePolicy::Drop, typename Fn>
     FUGO_FORCE_INLINE auto enqueue(std::size_t size, Fn&& fn) -> bool {
