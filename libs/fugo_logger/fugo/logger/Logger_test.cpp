@@ -40,6 +40,15 @@ TEST_CASE("Logger: DailyFileSink") {
   }
   logWarningF("end");
 
+  std::jthread([] {
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    logWarningF("begin");
+    for (auto i : std::views::iota(50) | std::views::take(25)) {
+      logWarningF("record #{}", i);
+    }
+    logWarningF("end");
+  }).join();
+
   fugo::logger::stopBackend();
 }
 

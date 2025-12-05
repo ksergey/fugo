@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <ctime>
 #include <source_location>
 #include <string_view>
 #include <thread>
@@ -13,24 +12,12 @@
 
 #include <fugo/core/Platform.h>
 
+#include "Clock.h"
+
 namespace fugo::logger {
 
 /// Log entry verbosity level
 enum class LogLevel { Error, Warning, Notice, Debug, Trace };
-
-/// Clock for timestamps
-template <clockid_t ClockID>
-struct LinuxClock {
-  using time_point = ::timespec;
-
-  [[nodiscard]] FUGO_FORCE_INLINE static auto now() noexcept -> time_point {
-    timespec ts;
-    ::clock_gettime(ClockID, &ts);
-    return ts;
-  }
-};
-
-using Clock = LinuxClock<CLOCK_REALTIME>;
 
 /// Decode args function signature
 using DecodeArgsFn = std::add_pointer_t<void(std::byte const*, fmt::dynamic_format_arg_store<fmt::format_context>*)>;
@@ -74,7 +61,7 @@ static_assert(std::is_trivially_copyable_v<RecordHeader>);
 /// Log record header
 struct LogRecordHeader {
   /// Log record timestamp
-  Clock::time_point timestamp;
+  Clock::Timestamp timestamp;
   /// Log record thread
   std::thread::id threadID;
 };

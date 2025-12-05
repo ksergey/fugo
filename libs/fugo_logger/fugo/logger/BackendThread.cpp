@@ -116,7 +116,8 @@ void BackendThread::processLogRecord(
   fmt::vformat_to(std::back_inserter(formatBuffer_), metadata->format, store);
   auto const message = std::string_view(formatBuffer_.data(), formatBuffer_.size());
 
-  sink.write(*metadata->location, metadata->level, logRecordHeader->timestamp, logRecordHeader->threadID, message);
+  sink.write(*metadata->location, metadata->level, Clock::toTimeSpec(logRecordHeader->timestamp),
+      logRecordHeader->threadID, message);
 }
 
 } // namespace fugo::logger
