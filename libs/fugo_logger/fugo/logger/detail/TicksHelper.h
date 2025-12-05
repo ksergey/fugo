@@ -57,8 +57,6 @@ private:
   }
 
   auto sync(std::chrono::nanoseconds lag) noexcept -> bool {
-    fmt::print(stderr, "sync\n");
-
     constexpr auto kMaxAttempts = std::size_t(4);
 
     for ([[maybe_unused]] auto attempt : std::views::iota(1) | std::views::take(kMaxAttempts)) {

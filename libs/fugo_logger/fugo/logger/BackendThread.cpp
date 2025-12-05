@@ -5,6 +5,7 @@
 
 #include <fmt/format.h>
 
+#include <fugo/core/LoopRateLimit.h>
 #include <fugo/core/ThreadUtils.h>
 
 namespace fugo::logger {
@@ -29,14 +30,14 @@ void BackendThread::start(std::unique_ptr<Sink> sink, BackendOptions const& opti
 
     running_.store(true, std::memory_order_seq_cst);
 
+    auto loopRateLimit = LoopRateLimit{options.sleepDuration};
     while (running_.load(std::memory_order_relaxed)) {
       try {
         this->processIncomingLogRecords(*sink);
       } catch (std::exception const& e) {
         fmt::print(stderr, "Logger backend thread error: {}\n", e.what());
       }
-
-      std::this_thread::sleep_for(options.sleepDuration);
+      loopRateLimit.sleep();
     }
 
     while (processIncomingLogRecords(*sink) > 0) {}
