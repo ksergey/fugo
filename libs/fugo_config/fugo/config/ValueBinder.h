@@ -22,15 +22,24 @@ struct Value {
 
 } // namespace detail
 
+// value<"param1">(&param1)
+//  .optional(777)
+//  .validate(gt(15) && lt(30))
+
 template <CtString Name, typename T, typename OptionalT = detail::None, typename ValidatorT = detail::None>
-class BasicBinder {
+class ValueBinder {
 private:
   T* valuePtr_;
   [[no_unique_address]] OptionalT optional_;
   [[no_unique_address]] ValidatorT validator_;
 
 public:
-  constexpr BasicBinder(T* valuePtr, OptionalT optional = {}, ValidatorT validator = {}) noexcept
+  ValueBinder(ValueBinder const&) = delete;
+  ValueBinder& operator=(ValueBinder const&) = delete;
+  ValueBinder(ValueBinder&&) = delete;
+  ValueBinder& operator=(ValueBinder&&) = delete;
+
+  constexpr ValueBinder(T* valuePtr, OptionalT optional = {}, ValidatorT validator = {}) noexcept
       : valuePtr_{valuePtr}, optional_{optional}, validator_{validator} {
     assert(valuePtr_);
   }
@@ -40,26 +49,33 @@ public:
     return Name;
   }
 
-  [[nodiscard]] constexpr auto optional(T value) && noexcept -> BasicBinder<Name, T, detail::Value<T>, ValidatorT> {
+  [[nodiscard]] constexpr auto optional(T value) && noexcept -> ValueBinder<Name, T, detail::Value<T>, ValidatorT> {
     return {valuePtr_, detail::Value{value}, std::move(validator_)};
   }
 
   template <typename ValidatorT2>
     requires Validator<ValidatorT2, T>
   [[nodiscard]] constexpr auto validate(ValidatorT2 validator) && noexcept
-      -> BasicBinder<Name, T, OptionalT, ValidatorT2> {
+      -> ValueBinder<Name, T, OptionalT, ValidatorT2> {
     return {valuePtr_, std::move(optional_), std::move(validator)};
   }
 
-protected:
   [[nodiscard]] constexpr auto valuePtr() const noexcept -> T* {
     return valuePtr_;
+  }
+
+  [[nodiscard]] static constexpr auto hasOptional() noexcept -> bool {
+    return !std::is_same_v<OptionalT, detail::None>;
+  }
+
+  [[nodiscard]] constexpr auto optionalValue() const noexcept -> T const& {
+    return optional_.value;
   }
 };
 
 template <CtString Name, typename T>
-[[nodiscard]] constexpr auto value(T* valuePtr) noexcept -> BasicBinder<Name, T> {
-  return BasicBinder<Name, T>(valuePtr);
+[[nodiscard]] constexpr auto value(T* valuePtr) noexcept -> ValueBinder<Name, T> {
+  return ValueBinder<Name, T>(valuePtr);
 }
 
 } // namespace fugo::config

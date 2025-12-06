@@ -3,7 +3,4 @@
 
 #include "Config.h"
 
-// TODO
-#include "BasicBinder.h"
-
 namespace fugo::config {} // namespace fugo::config
