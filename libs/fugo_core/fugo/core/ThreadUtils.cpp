@@ -25,7 +25,7 @@ auto setThisThreadName(std::string const& value) -> Result<> {
   if (rc != 0) {
     return {makePosixErrorCode(errno)};
   }
-  return success();
+  return {};
 }
 
 auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> Result<> {
@@ -36,7 +36,7 @@ auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> Result<> {
   if (auto const rc = ::pthread_setaffinity_np(::pthread_self(), sizeof(cpuset), &cpuset); rc != 0) {
     return {makePosixErrorCode(errno)};
   }
-  return success();
+  return {};
 }
 
 } // namespace core

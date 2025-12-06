@@ -12,9 +12,6 @@ namespace core {
 using turboq::Result;
 
 /// @see <turboq/Result.h>
-using turboq::success;
-
-/// @see <turboq/Result.h>
 using turboq::makePosixErrorCode;
 
 /// @see <turboq/Result.h>

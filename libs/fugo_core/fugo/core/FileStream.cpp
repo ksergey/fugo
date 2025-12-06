@@ -46,7 +46,7 @@ auto FileStream::closeNoThrow() noexcept -> Result<> {
   if (rc != 0) {
     return makePosixErrorCode(errno);
   } else {
-    return success();
+    return {};
   }
 }
 
