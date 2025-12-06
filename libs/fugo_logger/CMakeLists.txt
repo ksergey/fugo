@@ -1,5 +1,7 @@
 set(TargetName fugo_logger)
 
+option(FUGO_LOGGER_TSC_CLOCK "Use TSC clock instead of clock_gettime" ON)
+
 add_library(${TargetName})
 target_compile_features(${TargetName}
   PUBLIC cxx_std_23)
@@ -13,6 +15,11 @@ target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
   PUBLIC fmt::fmt turboq::turboq fugo::core)
+
+if (FUGO_LOGGER_TSC_CLOCK)
+  target_compile_definitions(${TargetName}
+    PUBLIC -DFUGO_LOGGER_TSC_CLOCK)
+endif()
 
 add_library(fugo::logger ALIAS ${TargetName})
 

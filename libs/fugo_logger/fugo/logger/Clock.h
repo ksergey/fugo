@@ -36,7 +36,10 @@ struct TSCClock {
   [[nodiscard]] static auto toTimeSpec(std::int64_t value) noexcept -> ::timespec;
 };
 
-// using Clock = LinuxClock<CLOCK_REALTIME>;
+#if defined(FUGO_LOGGER_TSC_CLOCK)
 using Clock = TSCClock;
+#else
+using Clock = LinuxClock<CLOCK_REALTIME>;
+#endif
 
 } // namespace fugo::logger
