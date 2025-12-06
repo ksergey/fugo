@@ -16,4 +16,8 @@ public:
   JsonBinder() = default;
 };
 
+// value<"param1">(&param1)
+//  .optional(777)
+//  .validate(gt(15) && lt(30))
+
 } // namespace fugo::config
