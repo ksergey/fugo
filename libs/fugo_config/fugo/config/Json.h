@@ -32,14 +32,14 @@ struct JsonBinder {
     if (auto const found = json.find(binder.name()); found != json.end()) {
       JsonMapping<ValueT>::read(found.value(), *binder.valuePtr());
     } else {
-      if constexpr (binder.hasOptional()) {
+      if constexpr (ValueBinderT::hasOptional()) {
         *binder.valuePtr() = binder.optionalValue();
       } else {
         throw JsonException("Value \"{}\" not found", binder.name());
       }
     }
 
-    if constexpr (binder.hasValidator()) {
+    if constexpr (ValueBinderT::hasValidator()) {
       if (auto const result = binder.validate(); !result) {
         throw JsonException("Invalid value \"{}\" ({})", binder.name(), result.error());
       }
@@ -47,7 +47,17 @@ struct JsonBinder {
   }
 
   void to(nlohmann::json& json) {
-    // TODO:
+    using ValueT = std::remove_pointer_t<decltype(binder.valuePtr())>;
+
+    if constexpr (ValueBinderT::hasValidator()) {
+      if (auto const result = binder.validate(); !result) {
+        throw JsonException("Invalid value \"{}\" ({})", binder.name(), result.error());
+      }
+    }
+
+    nlohmann::json entry;
+    JsonMapping<ValueT>::write(entry, *binder.valuePtr());
+    json[binder.name()] = entry;
   }
 };
 
@@ -104,11 +114,11 @@ template <typename T>
 struct JsonMapping<T> {
   static void read(nlohmann::json const& json, T& value) {
     detail::JsonInput input{json};
-    value.template serialize(input);
+    value.serialize(input);
   }
   static void write(nlohmann::json& json, T const& value) {
     detail::JsonOutput output{json};
-    const_cast<T&>(value).template serialize(output);
+    const_cast<T&>(value).serialize(output);
   }
 };
 

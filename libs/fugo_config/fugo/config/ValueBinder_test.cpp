@@ -51,6 +51,12 @@ TEST_CASE("Test") {
 
   REQUIRE_EQ(result.path, "/dev");
   REQUIRE_EQ(result.count, 45);
+
+  result.path = "/proc";
+  nlohmann::json json;
+  JsonMapping<Object>::write(json, result);
+
+  fmt::print("result:{}\n", json.dump(2));
 }
 
 } // namespace fugo::config
