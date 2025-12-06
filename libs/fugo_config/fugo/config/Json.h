@@ -35,12 +35,20 @@ struct JsonBinder {
       if constexpr (binder.hasOptional()) {
         *binder.valuePtr() = binder.optionalValue();
       } else {
-        throw JsonException("value \"{}\" not found", binder.name());
+        throw JsonException("Value \"{}\" not found", binder.name());
+      }
+    }
+
+    if constexpr (binder.hasValidator()) {
+      if (auto const result = binder.validate(); !result) {
+        throw JsonException("Invalid value \"{}\" ({})", binder.name(), result.error());
       }
     }
   }
 
-  void to(nlohmann::json& json) {}
+  void to(nlohmann::json& json) {
+    // TODO:
+  }
 };
 
 namespace detail {

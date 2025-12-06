@@ -71,6 +71,14 @@ public:
   [[nodiscard]] constexpr auto optionalValue() const noexcept -> T const& {
     return optional_.value;
   }
+
+  [[nodiscard]] static constexpr auto hasValidator() noexcept -> bool {
+    return !std::is_same_v<ValidatorT, detail::None>;
+  }
+
+  [[nodiscard]] constexpr auto validate() const noexcept -> ValidateResult {
+    return validator_(*valuePtr());
+  }
 };
 
 template <CtString Name, typename T>
