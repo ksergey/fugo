@@ -5,7 +5,7 @@
 
 #include <mutex>
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexcept -> Queue::Producer {
   if (!capacityHint) {
@@ -42,4 +42,4 @@ void QueueManager::rebuildQueues() {
   }
 }
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

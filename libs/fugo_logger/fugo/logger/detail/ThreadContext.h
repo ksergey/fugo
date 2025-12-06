@@ -10,7 +10,7 @@
 #include "Queue.h"
 #include "QueueManager.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 class ThreadContext final {
 private:
@@ -45,4 +45,4 @@ public:
   }
 };
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

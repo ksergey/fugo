@@ -5,7 +5,7 @@
 
 #include "QueueManager.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 auto getConsumersCount(QueueManager& qm) noexcept -> std::size_t {
   std::size_t count = 0;
@@ -40,4 +40,4 @@ TEST_CASE("QueueManager") {
   REQUIRE_EQ(getConsumersCount(queueManager), 0);
 }
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

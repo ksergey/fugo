@@ -12,7 +12,7 @@
 
 #include <fmt/format.h>
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 namespace {
 
 struct Signal {
@@ -48,12 +48,12 @@ void failureSignalHandler(
     std::this_thread::sleep_for(std::chrono::seconds{30});
   }
 
-  Backend::instance().stop();
+  Backend::instance()->stop();
 }
 
 void installAtExitHandler() noexcept {
   auto const rc = std::atexit([] {
-    Backend::instance().stop();
+    Backend::instance()->stop();
   });
   if (rc != 0) {
     fmt::print(stderr, "Can't install at-exit handler\n");
@@ -90,4 +90,4 @@ void Backend::stop() {
   backendThread_.stop();
 }
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

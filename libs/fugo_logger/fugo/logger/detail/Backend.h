@@ -9,13 +9,13 @@
 
 #include <fugo/core/Platform.h>
 
-#include "BackendOptions.h"
+#include "../BackendOptions.h"
+#include "../Common.h"
+#include "../Sink.h"
 #include "BackendThread.h"
-#include "Common.h"
-#include "Sink.h"
 #include "ThreadContext.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 class Backend {
 private:
@@ -26,9 +26,9 @@ private:
   std::mutex backendThreadMutex_;
 
 public:
-  [[nodiscard]] FUGO_FORCE_INLINE static auto instance() -> Backend& {
+  [[nodiscard]] FUGO_FORCE_INLINE static auto instance() -> Backend* {
     static Backend instance;
-    return instance;
+    return &instance;
   }
 
   Backend(Backend const&) = delete;
@@ -80,8 +80,4 @@ private:
   Backend() = default;
 };
 
-[[nodiscard]] FUGO_FORCE_INLINE auto backend() -> Backend& {
-  return Backend::instance();
-}
-
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

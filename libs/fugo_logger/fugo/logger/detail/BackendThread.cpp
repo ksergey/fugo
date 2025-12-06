@@ -8,7 +8,7 @@
 #include <fugo/core/LoopRateLimit.h>
 #include <fugo/core/ThreadUtils.h>
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 BackendThread::BackendThread(QueueManager& queueManager) : queueManager_{queueManager} {}
 
@@ -121,4 +121,4 @@ void BackendThread::processLogRecord(
       logRecordHeader->threadID, message);
 }
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

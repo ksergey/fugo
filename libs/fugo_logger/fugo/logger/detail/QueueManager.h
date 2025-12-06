@@ -13,7 +13,7 @@
 
 #include "Queue.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 /// Default queue capacity hint
 constexpr std::size_t kDefaultCapacityHint = 2 * 1024 * 1024;
@@ -77,4 +77,4 @@ private:
   void rebuildQueues();
 };
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

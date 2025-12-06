@@ -10,11 +10,11 @@
 
 #include <fmt/format.h>
 
-#include "BackendOptions.h"
+#include "../BackendOptions.h"
+#include "../Sink.h"
 #include "QueueManager.h"
-#include "Sink.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 class BackendThread final {
 private:
@@ -53,4 +53,4 @@ private:
       Sink& sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata, std::byte const* argsBuffer);
 };
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

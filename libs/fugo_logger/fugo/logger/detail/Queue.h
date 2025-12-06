@@ -14,10 +14,10 @@
 #include <fugo/core/TypeTraits.h>
 #include <turboq/BoundedSPSCRawQueue.h>
 
-#include "Codec.h"
-#include "Common.h"
+#include "../Codec.h"
+#include "../Common.h"
 
-namespace fugo::logger {
+namespace fugo::logger::detail {
 
 /// Enqueue policy
 enum class EnqueuePolicy {
@@ -127,4 +127,4 @@ struct Queue {
   }
 };
 
-} // namespace fugo::logger
+} // namespace fugo::logger::detail

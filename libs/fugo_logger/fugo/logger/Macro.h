@@ -25,7 +25,7 @@
 
 #define FUGO_LOG(LEVEL, FLAGS, FMT, ...)                                                                               \
   do {                                                                                                                 \
-    if (::fugo::logger::backend().shouldLog(::fugo::logger::LogLevel::LEVEL)) {                                        \
+    if (::fugo::logger::shouldLog(::fugo::logger::LogLevel::LEVEL)) {                                                  \
       FUGO_LOG_CALL(LEVEL, FLAGS, FMT, __VA_ARGS__);                                                                   \
     }                                                                                                                  \
   } while (0)
