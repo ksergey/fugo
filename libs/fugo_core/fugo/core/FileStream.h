@@ -4,10 +4,11 @@
 #pragma once
 
 #include <cstdio>
+#include <expected>
 #include <filesystem>
 
 #include "Platform.h"
-#include "Result.h"
+#include "PosixError.h"
 
 namespace fugo {
 namespace core {
@@ -56,7 +57,7 @@ public:
   auto release() noexcept -> FILE*;
 
   /// Close stream if owned
-  auto closeNoThrow() noexcept -> Result<>;
+  auto closeNoThrow() noexcept -> std::expected<void, std::error_code>;
 
   /// Close stream if owned. Throws on error
   void close();

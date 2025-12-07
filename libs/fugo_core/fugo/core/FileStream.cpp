@@ -40,11 +40,11 @@ auto FileStream::release() noexcept -> FILE* {
   return released;
 }
 
-auto FileStream::closeNoThrow() noexcept -> Result<> {
+auto FileStream::closeNoThrow() noexcept -> std::expected<void, std::error_code> {
   int const rc = owns_ ? ::fclose(file_) : 0;
   release();
   if (rc != 0) {
-    return makePosixErrorCode(errno);
+    return std::unexpected(makePosixErrorCode(errno));
   } else {
     return {};
   }
