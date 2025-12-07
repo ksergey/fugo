@@ -71,14 +71,34 @@ void serialize(ObjectB& obj, DTO& dto) {
 TEST_CASE("Config: JSON 1") {
   ObjectB config;
 
-  auto const result = readFromJson(config, R"({
-    "status": "draw",
-    "events": [ "line", "circle" ]
-  })");
+  {
+    auto const result = fromJson(config, R"({
+      "status": "draw",
+      "events": [ "line", "circle" ]
+    })");
 
-  REQUIRE(result);
-  REQUIRE_EQ(config.status, "draw");
-  REQUIRE_EQ(config.sourceID, 77);
+    REQUIRE(result);
+    REQUIRE_EQ(config.status, "draw");
+    REQUIRE_EQ(config.sourceID, 77);
+
+    fmt::print("result:\n{}\n", toJson(config).value());
+  }
+
+  {
+    auto const result = fromJson(config, R"({
+      "status": "draw",
+      "events": "dot",
+      "sourceID": 133
+    })");
+
+    REQUIRE(result);
+    REQUIRE_EQ(config.status, "draw");
+    REQUIRE_EQ(config.sourceID, 133);
+
+    config.events.push_back("star");
+
+    fmt::print("result:\n{}\n", toJson(config).value());
+  }
 }
 
 } // namespace fugo::config

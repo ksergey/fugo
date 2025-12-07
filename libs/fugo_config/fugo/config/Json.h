@@ -23,8 +23,9 @@ namespace fugo::config {
 template <typename T>
 struct JsonMapping;
 
+/// Read config from json file
 template <typename T>
-[[nodiscard]] auto readFromJsonFile(T& value, std::filesystem::path const& path) noexcept
+[[nodiscard]] auto fromJsonFile(T& value, std::filesystem::path const& path) noexcept
     -> std::expected<void, std::string> {
   try {
     auto stream = FileStream(path, "r");
@@ -38,7 +39,7 @@ template <typename T>
 
 /// Read config from json content
 template <typename T>
-[[nodiscard]] auto readFromJson(T& value, std::string_view content) noexcept -> std::expected<void, std::string> {
+[[nodiscard]] auto fromJson(T& value, std::string_view content) noexcept -> std::expected<void, std::string> {
   try {
     auto const json = nlohmann::json::parse(content);
     JsonMapping<T>::read(json, value);
@@ -46,6 +47,18 @@ template <typename T>
     return std::unexpected(e.what());
   }
   return {};
+}
+
+/// Serialize config to json string
+template <typename T>
+[[nodiscard]] auto toJson(T const& value, std::size_t indent = 2) noexcept -> std::expected<std::string, std::string> {
+  try {
+    nlohmann::json json;
+    JsonMapping<T>::write(json, value);
+    return {json.dump(indent)};
+  } catch (std::exception const& e) {
+    return std::unexpected(e.what());
+  }
 }
 
 template <typename ValueBinderT>
