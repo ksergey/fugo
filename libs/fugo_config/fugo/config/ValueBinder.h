@@ -4,11 +4,8 @@
 #pragma once
 
 #include <cassert>
-#include <optional>
 
 #include <fugo/core/CtString.h>
-
-#include "Validator.h"
 
 namespace fugo::config {
 namespace detail {
@@ -23,14 +20,24 @@ struct Value {
 } // namespace detail
 
 // value<"param1">(&param1)
-//  .optional(777)
+//  .defaultValue(777)
 //  .validate(gt(15) && lt(30))
 
-template <CtString Name, typename T, typename OptionalT = detail::None, typename ValidatorT = detail::None>
+template <typename ValidatorT, typename T>
+concept Validator = requires(ValidatorT validator, T value) {
+  { validator(value) } -> std::same_as<bool>;
+};
+
+/// Binder to a value
+/// @tparam Name is parameter value name
+/// @tparam T is parameter value type
+/// @tparam DefaultValueT is storage for holding default value (if configured)
+/// @tparam ValidatorT is storage for holding a value validator
+template <CtString Name, typename T, typename DefaultValueT = detail::None, typename ValidatorT = detail::None>
 class ValueBinder {
 private:
   T* valuePtr_;
-  [[no_unique_address]] OptionalT optional_;
+  [[no_unique_address]] DefaultValueT defaultValue_;
   [[no_unique_address]] ValidatorT validator_;
 
 public:
@@ -39,8 +46,8 @@ public:
   ValueBinder(ValueBinder&&) = delete;
   ValueBinder& operator=(ValueBinder&&) = delete;
 
-  constexpr ValueBinder(T* valuePtr, OptionalT optional = {}, ValidatorT validator = {}) noexcept
-      : valuePtr_{valuePtr}, optional_{optional}, validator_{validator} {
+  constexpr ValueBinder(T* valuePtr, DefaultValueT defaultValue = {}, ValidatorT validator = {}) noexcept
+      : valuePtr_{valuePtr}, defaultValue_{defaultValue}, validator_{validator} {
     assert(valuePtr_);
   }
 
@@ -49,35 +56,38 @@ public:
     return Name;
   }
 
-  [[nodiscard]] constexpr auto optional(T value) && noexcept -> ValueBinder<Name, T, detail::Value<T>, ValidatorT> {
+  [[nodiscard]] constexpr auto defaultValue(T value) && noexcept -> ValueBinder<Name, T, detail::Value<T>, ValidatorT> {
     return {valuePtr_, detail::Value{value}, std::move(validator_)};
   }
 
   template <typename ValidatorT2>
     requires Validator<ValidatorT2, T>
   [[nodiscard]] constexpr auto validate(ValidatorT2 validator) && noexcept
-      -> ValueBinder<Name, T, OptionalT, ValidatorT2> {
-    return {valuePtr_, std::move(optional_), std::move(validator)};
+      -> ValueBinder<Name, T, DefaultValueT, ValidatorT2> {
+    return {valuePtr_, std::move(defaultValue_), std::move(validator)};
   }
 
   [[nodiscard]] constexpr auto valuePtr() const noexcept -> T* {
     return valuePtr_;
   }
 
-  [[nodiscard]] static constexpr auto hasOptional() noexcept -> bool {
-    return !std::is_same_v<OptionalT, detail::None>;
+  /// Sete default value, throws on no default value available
+  constexpr void setDefaultValue() const {
+    if constexpr (requires { defaultValue_.value; }) {
+      *valuePtr_ = defaultValue_.value;
+    } else {
+      throw Exception("No default value for \"{}\"", this->name());
+    }
   }
 
-  [[nodiscard]] constexpr auto optionalValue() const noexcept -> T const& {
-    return optional_.value;
-  }
-
-  [[nodiscard]] static constexpr auto hasValidator() noexcept -> bool {
-    return !std::is_same_v<ValidatorT, detail::None>;
-  }
-
-  [[nodiscard]] constexpr auto validate() const noexcept -> ValidateResult {
-    return validator_(*valuePtr());
+  /// Validate a value, throws on error
+  /// do nothing on validator not available
+  constexpr void validate() const {
+    if constexpr (requires { validator_(*valuePtr_); }) {
+      if (auto const result = validator_(*valuePtr_); !result) {
+        throw ValidateError("Value for \"{}\" not pass validation", this->name());
+      }
+    }
   }
 };
 

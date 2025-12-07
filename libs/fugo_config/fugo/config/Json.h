@@ -3,24 +3,51 @@
 
 #pragma once
 
+#include <expected>
+#include <filesystem>
 #include <string>
+#include <string_view>
 #include <type_traits>
+#include <vector>
 
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 
+#include <fugo/core/FileStream.h>
+#include <fugo/core/Result.h>
+
+#include "Exception.h"
 #include "ValueBinder.h"
 
 namespace fugo::config {
 
-struct JsonException : std::runtime_error {
-  template <typename... Args>
-  JsonException(fmt::format_string<Args...> fmtStr, Args&&... args)
-      : std::runtime_error{fmt::format(fmtStr, std::forward<Args>(args)...)} {}
-};
-
 template <typename T>
 struct JsonMapping;
+
+template <typename T>
+[[nodiscard]] auto readFromJsonFile(T& value, std::filesystem::path const& path) noexcept
+    -> std::expected<void, std::string> {
+  try {
+    auto stream = FileStream(path, "r");
+    auto const json = nlohmann::json::parse(stream);
+    JsonMapping<T>::read(json, value);
+  } catch (std::exception const& e) {
+    return std::unexpected(e.what());
+  }
+  return {};
+}
+
+/// Read config from json content
+template <typename T>
+[[nodiscard]] auto readFromJson(T& value, std::string_view content) noexcept -> std::expected<void, std::string> {
+  try {
+    auto const json = nlohmann::json::parse(content);
+    JsonMapping<T>::read(json, value);
+  } catch (std::exception const& e) {
+    return std::unexpected(e.what());
+  }
+  return {};
+}
 
 template <typename ValueBinderT>
 struct JsonBinder {
@@ -32,28 +59,17 @@ struct JsonBinder {
     if (auto const found = json.find(binder.name()); found != json.end()) {
       JsonMapping<ValueT>::read(found.value(), *binder.valuePtr());
     } else {
-      if constexpr (ValueBinderT::hasOptional()) {
-        *binder.valuePtr() = binder.optionalValue();
-      } else {
-        throw JsonException("Value \"{}\" not found", binder.name());
-      }
+      binder.setDefaultValue();
     }
 
-    if constexpr (ValueBinderT::hasValidator()) {
-      if (auto const result = binder.validate(); !result) {
-        throw JsonException("Invalid value \"{}\" ({})", binder.name(), result.error());
-      }
-    }
+    binder.validate();
   }
 
   void to(nlohmann::json& json) {
     using ValueT = std::remove_pointer_t<decltype(binder.valuePtr())>;
 
-    if constexpr (ValueBinderT::hasValidator()) {
-      if (auto const result = binder.validate(); !result) {
-        throw JsonException("Invalid value \"{}\" ({})", binder.name(), result.error());
-      }
-    }
+    // Validate before write
+    binder.validate();
 
     nlohmann::json entry;
     JsonMapping<ValueT>::write(entry, *binder.valuePtr());
@@ -136,6 +152,7 @@ struct JsonMapping<T> {
   }
 };
 
+/// Mapping for arithmetic types (int, double, etc...)
 template <typename T>
   requires std::is_arithmetic_v<T>
 struct JsonMapping<T> {
@@ -147,6 +164,7 @@ struct JsonMapping<T> {
   }
 };
 
+/// Mapping for string
 template <>
 struct JsonMapping<std::string> {
   static void read(nlohmann::json const& json, std::string& value) {
@@ -154,6 +172,29 @@ struct JsonMapping<std::string> {
   }
   static void write(nlohmann::json& json, std::string const& value) {
     json = value;
+  }
+};
+
+/// Mapping for std::vector
+template <typename T, typename Allocator>
+struct JsonMapping<std::vector<T, Allocator>> {
+  static void read(nlohmann::json const& json, std::vector<T, Allocator>& value) {
+    value.clear();
+    if (json.is_array()) {
+      value.reserve(json.size());
+      for (auto const& item : json) {
+        JsonMapping<T>::read(item, value.emplace_back());
+      }
+    } else {
+      JsonMapping<T>::read(json, value.emplace_back());
+    }
+  }
+  static void write(nlohmann::json& json, std::vector<T, Allocator> const& value) {
+    for (auto const& entry : value) {
+      nlohmann::json item;
+      JsonMapping<T>::write(item, entry);
+      json.push_back(item);
+    }
   }
 };
 
