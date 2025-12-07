@@ -19,10 +19,6 @@ struct Value {
 
 } // namespace detail
 
-// value<"param1">(&param1)
-//  .defaultValue(777)
-//  .validate(gt(15) && lt(30))
-
 template <typename ValidatorT, typename T>
 concept Validator = requires(ValidatorT validator, T value) {
   { validator(value) } -> std::same_as<bool>;
@@ -94,6 +90,11 @@ public:
   }
 };
 
+/// Create value binder inside @c serialize
+///
+/// value<"param1">(&param1)
+///  .defaultValue(777)
+///  .validate(gt(15) && lt(30))
 template <CtString Name, typename T>
 [[nodiscard]] constexpr auto value(T* valuePtr) noexcept -> ValueBinder<Name, T> {
   return ValueBinder<Name, T>(valuePtr);

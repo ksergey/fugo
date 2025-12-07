@@ -3,5 +3,8 @@
 
 #pragma once
 
-#include "Json.h"
-#include "Validators.h"
+namespace fugo::config {
+
+// TODO
+
+} // namespace fugo::config
