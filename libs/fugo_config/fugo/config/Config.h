@@ -3,4 +3,4 @@
 
 #pragma once
 
-namespace fugo::config {} // namespace fugo::config
+#include "Json.h"

@@ -5,6 +5,7 @@
 
 #include <expected>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -206,6 +207,25 @@ struct JsonMapping<std::vector<T, Allocator>> {
       nlohmann::json item;
       JsonMapping<T>::write(item, entry);
       json.push_back(item);
+    }
+  }
+};
+
+/// Mapping for std::optional
+template <typename T>
+struct JsonMapping<std::optional<T>> {
+  static void read(nlohmann::json const& json, std::optional<T>& value) {
+    if (json.is_null()) {
+      value = std::nullopt;
+    } else {
+      JsonMapping<T>::read(json, value.emplace());
+    }
+  }
+  static void write(nlohmann::json& json, std::optional<T> const& value) {
+    if (!value.has_value()) {
+      json = nullptr;
+    } else {
+      JsonMapping<T>::write(json, *value);
     }
   }
 };

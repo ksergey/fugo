@@ -4,15 +4,20 @@
 #include <doctest/doctest.h>
 
 #include <cstdint>
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "Json.h"
 
 namespace fugo::config {
 
+// TODO more tests
+
 struct ObjectA {
   std::string path;
   std::int32_t count;
+  std::optional<std::int32_t> size;
 
   template <typename DTO>
   void serialize(DTO& dto) {
@@ -20,6 +25,7 @@ struct ObjectA {
     dto
       & value<"path">(&path)
       & value<"count">(&count).defaultValue(45)
+      & value<"size">(&size).defaultValue(std::nullopt)
     ;
     // clang-format on
   }
@@ -36,8 +42,12 @@ TEST_CASE("Config: JSON 0") {
   REQUIRE_EQ(result.path, "/dev/shm");
   REQUIRE_EQ(result.count, 17);
 
+  nlohmann::json json;
+  JsonMapping<ObjectA>::write(json, result);
+  fmt::print("result:{}\n", json.dump(2));
+
   auto json1 = nlohmann::json::parse(R"(
-    {"path" : "/dev"}
+    {"path" : "/dev", "size": 120 }
   )");
   JsonMapping<ObjectA>::read(json1, result);
 
@@ -45,7 +55,6 @@ TEST_CASE("Config: JSON 0") {
   REQUIRE_EQ(result.count, 45);
 
   result.path = "/proc";
-  nlohmann::json json;
   JsonMapping<ObjectA>::write(json, result);
 
   fmt::print("result:{}\n", json.dump(2));
