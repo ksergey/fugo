@@ -56,8 +56,11 @@ public:
     return Name;
   }
 
-  [[nodiscard]] constexpr auto defaultValue(T value) && noexcept -> ValueBinder<Name, T, detail::Value<T>, ValidatorT> {
-    return {valuePtr_, detail::Value{value}, std::move(validator_)};
+  template <typename T2>
+    requires std::convertible_to<T2, T>
+  [[nodiscard]] constexpr auto defaultValue(T2 value) && noexcept
+      -> ValueBinder<Name, T, detail::Value<T2>, ValidatorT> {
+    return {valuePtr_, detail::Value<T2>{value}, std::move(validator_)};
   }
 
   template <typename ValidatorT2>

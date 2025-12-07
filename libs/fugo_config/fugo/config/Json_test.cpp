@@ -7,7 +7,6 @@
 #include <string>
 
 #include "Json.h"
-#include "ValueBinder.h"
 
 namespace fugo::config {
 
@@ -52,8 +51,34 @@ TEST_CASE("Config: JSON 0") {
   fmt::print("result:{}\n", json.dump(2));
 }
 
-TEST_CASE("Config: JSON 1") {
+struct ObjectB {
+  std::string status;
+  std::vector<std::string> events;
+  int sourceID;
+};
 
+template <typename DTO>
+void serialize(ObjectB& obj, DTO& dto) {
+  // clang-format off
+    dto
+      & value<"status">(&obj.status).defaultValue("nothing")
+      & value<"events">(&obj.events).defaultValue(std::vector<std::string>{})
+      & value<"sourceID">(&obj.sourceID).defaultValue(77)
+    ;
+  // clang-format on
+}
+
+TEST_CASE("Config: JSON 1") {
+  ObjectB config;
+
+  auto const result = readFromJson(config, R"({
+    "status": "draw",
+    "events": [ "line", "circle" ]
+  })");
+
+  REQUIRE(result);
+  REQUIRE_EQ(config.status, "draw");
+  REQUIRE_EQ(config.sourceID, 77);
 }
 
 } // namespace fugo::config
