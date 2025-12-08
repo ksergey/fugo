@@ -7,6 +7,8 @@
 
 #include <fugo/core/CtString.h>
 
+#include "Validator.h"
+
 namespace fugo::config {
 namespace detail {
 
@@ -18,11 +20,6 @@ struct Value {
 };
 
 } // namespace detail
-
-template <typename ValidatorT, typename T>
-concept Validator = requires(ValidatorT validator, T value) {
-  { validator(value) } -> std::same_as<bool>;
-};
 
 /// Binder to a value
 /// @tparam Name is parameter value name
@@ -60,7 +57,7 @@ public:
   }
 
   template <typename ValidatorT2>
-    requires Validator<ValidatorT2, T>
+    requires Validator<ValidatorT2>
   [[nodiscard]] constexpr auto validate(ValidatorT2 validator) && noexcept
       -> ValueBinder<Name, T, DefaultValueT, ValidatorT2> {
     return {valuePtr_, std::move(defaultValue_), std::move(validator)};
