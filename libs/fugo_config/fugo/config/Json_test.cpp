@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Json.h"
+#include "Validator.h"
 
 namespace fugo::config {
 
@@ -108,6 +109,40 @@ TEST_CASE("Config: JSON 1") {
 
     fmt::print("result:\n{}\n", toJson(config).value());
   }
+}
+
+struct ObjectC {
+  std::string status;
+  int entityID;
+};
+
+template <typename DTO>
+void serialize(ObjectC& obj, DTO& dto) {
+  using namespace std::string_view_literals;
+
+  // clang-format off
+  dto
+    & value<"status">(&obj.status)
+      .defaultValue("none")
+      .validate(oneOf("init"sv, "new"sv, "cancelled"sv, "replaced"sv))
+    & value<"entityID">(&obj.entityID)
+  ;
+  // clang-format on
+}
+
+TEST_CASE("Config: JSON 2") {
+  ObjectC config;
+
+  // clang-format off
+  auto const result = fromJson(config, R"({
+    "status": "draw",
+    "entityID": 1000
+  })");
+  // clang-format on
+
+  REQUIRE(!result);
+
+  fmt::print("error: {}\n", result.error());
 }
 
 } // namespace fugo::config
