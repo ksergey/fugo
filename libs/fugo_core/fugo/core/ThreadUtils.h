@@ -4,21 +4,22 @@
 #pragma once
 
 #include <cstdint>
+#include <expected>
 #include <string>
 
-#include "Result.h"
+#include "PosixError.h"
 
 namespace fugo {
 namespace core {
 
 /// Return name of the thread
-auto getThisThreadName() -> Result<std::string>;
+auto getThisThreadName() -> std::expected<std::string, std::error_code>;
 
 /// Set name of the thread
-auto setThisThreadName(std::string const& value) -> Result<>;
+auto setThisThreadName(std::string const& value) -> std::expected<void, std::error_code>;
 
 /// Pin current thread to specified core number
-auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> Result<>;
+auto pinCurrentThreadToCoreNo(std::uint16_t coreNo) noexcept -> std::expected<void, std::error_code>;
 
 } // namespace core
 
