@@ -6,6 +6,12 @@ option(FUGO_SANITIZER "Build with sanitizer" OFF)
 
 include(cmake/FugoUtils.cmake)
 
+if (NOT TARGET doctest::doctest_with_main)
+  add_subdirectory(deps/doctest)
+endif()
+if (NOT TARGET benchmark::benchmark_main)
+  add_subdirectory(deps/benchmark)
+endif()
 if (NOT TARGET fmt::fmt)
   add_subdirectory(deps/fmtlib)
 endif()
@@ -18,12 +24,8 @@ endif()
 if (NOT TARGET turboq::turboq)
   add_subdirectory(deps/turboq)
 endif()
-if (NOT TARGET doctest::doctest_with_main)
-  add_subdirectory(deps/doctest)
-endif()
-if (NOT TARGET benchmark::benchmark_main)
-  add_subdirectory(deps/benchmark)
-endif()
+
+add_subdirectory(deps/sbe-code-gen)
 
 enable_testing()
 
