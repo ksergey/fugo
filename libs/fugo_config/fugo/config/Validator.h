@@ -4,9 +4,11 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <functional>
+#include <regex>
 #include <string_view>
-#include <vector>
+#include <type_traits>
 
 namespace fugo::config {
 
@@ -159,19 +161,46 @@ struct Fn {
 template <typename FnT>
 Fn(FnT) -> Fn<FnT>;
 
+// helper type for the visitor
+template <class... Ts>
+struct Overloads : Ts... {
+  using Ts::operator()...;
+};
+
 } // namespace detail
 
 consteval auto empty() {
-  return detail::Fn{[](auto const& value) {
-    return std::empty(value);
+  // clang-format off
+  return detail::Fn{detail::Overloads{
+    [](auto const& value) {
+      return std::empty(value);
+    },
+    [](char const* value) {
+        return *value == '\0';
+    }
   }};
+  // clang-format on
 }
 
-// TODO: make consteval
-template <typename T>
-constexpr auto oneOf(std::initializer_list<T> values) {
-  return detail::Fn([values = std::vector<T>{values}](auto const& value) -> bool {
+template <typename T, std::size_t N>
+consteval auto oneOf(T const (&values)[N]) {
+  return detail::Fn([values = std::to_array(values)](auto const& value) -> bool {
     return std::find(values.begin(), values.end(), value) != values.end();
+  });
+}
+
+/// @overload
+template <typename... Ts>
+consteval auto oneOf(Ts const&... args) {
+  using T = std::common_type_t<Ts...>;
+  return oneOf<T, sizeof...(Ts)>({static_cast<T>(args)...});
+}
+
+/// Match string-value to regex pattern
+inline auto match(char const* pattern) {
+  return detail::Fn([regex = std::regex(pattern)](std::string_view value) -> bool {
+    std::cmatch match;
+    return std::regex_match(value.begin(), value.end(), match, regex);
   });
 }
 
