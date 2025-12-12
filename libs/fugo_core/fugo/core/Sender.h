@@ -3,42 +3,27 @@
 
 #pragma once
 
+#include <turboq/concepts.h>
+
+#include <expected>
 #include <functional>
 
 namespace fugo {
 namespace core {
 
-template <typename BaseT, template <typename> typename... Fs>
-struct BasicSender : public BaseT, Fs<BasicSender<BaseT, Fs...>>... {
-  using BaseT::BaseT;
-
-  template <typename Fn>
-  constexpr void forEach(Fn&& fn) {
-    (std::invoke(std::forward<Fn>(fn), static_cast<Fs<BasicSender<BaseT, Fs...>>&>(*this)), ...);
-  }
-
-  template <typename Fn>
-  constexpr void forEach(Fn&& fn) const {
-    (std::invoke(std::forward<Fn>(fn), static_cast<Fs<BasicSender<BaseT, Fs...>> const&>(*this)), ...);
+struct BufferSenderMixin {
+  template <typename Self, typename Fn>
+    requires turboq::Producer<Self>
+  constexpr auto send(this Self& self, std::size_t bufferSize, Fn&& fn) -> std::expected<void, char const*> {
+    auto buffer = self.prepare(bufferSize);
+    if (buffer.empty()) [[unlikely]] {
+      return std::unexpected("Failed to allocate buffer");
+    }
+    std::invoke(std::forward<Fn>(fn), buffer);
+    self.cimmit();
+    return {};
   }
 };
-
-namespace detail {
-
-template <typename BaseT, typename Fs>
-struct BasicSenderHelper;
-template <typename BaseT, template <typename...> typename List, typename... Fs>
-struct BasicSenderHelper<BaseT, List<Fs...>> {
-  using type = BasicSender<BaseT, Fs::template Impl...>;
-};
-
-} // namespace detail
-
-template <typename...>
-struct Features;
-
-template <typename BaseT, typename Fs = Features<>>
-using Sender = typename detail::BasicSenderHelper<Base, Fs>::type;
 
 } // namespace core
 
