@@ -38,7 +38,7 @@ namespace {
   return std::unexpected(makePosixErrorCode(ENOENT));
 }
 
-[[nodiscard]] auto getSelfPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
+[[nodiscard]] auto getBinaryPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
   char buffer[PATH_MAX];
   if (auto const rc = ::readlink("/proc/self/exe", buffer, sizeof(buffer)); rc != -1) {
     return std::filesystem::path{std::string{buffer, static_cast<std::size_t>(rc)}};
@@ -47,8 +47,8 @@ namespace {
   }
 }
 
-[[nodiscard]] auto getSystemRoot() noexcept -> std::expected<std::filesystem::path, std::error_code> {
-  if (auto const value = std::getenv("FUGO_SYSTEM_ROOT"); value != nullptr) {
+[[nodiscard]] auto getSystemPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
+  if (auto const value = std::getenv("FUGO_SYSTEM_PATH"); value != nullptr) {
     return std::filesystem::path{value};
   }
   if (auto const result = getHomePath(); result) {
@@ -64,26 +64,26 @@ Environment::Environment(std::string instanceName, std::string scope)
   if (instanceName_.empty()) {
     throw std::system_error{makePosixErrorCode(EINVAL), "Empty instance name"};
   }
-  if (auto result = getSelfPath(); result) {
-    selfPath_ = result.value();
+  if (auto result = getBinaryPath(); result) {
+    binaryPath_ = result.value();
   } else {
-    throw std::system_error{result.error(), "Failed to obtain self binary path"};
+    throw std::system_error{result.error(), "Failed to obtain binary path"};
   }
-  if (auto const result = getSystemRoot(); result) {
-    systemRootPath_ = result.value();
+  if (auto const result = getSystemPath(); result) {
+    systemPath_ = result.value();
   } else {
-    throw std::system_error{result.error(), "Failed to obtain system root path"};
+    throw std::system_error{result.error(), "Failed to obtain system path"};
   }
 
-  dataRootPath_ = systemRootPath_ / "data" / instanceName_;
-  if (!exists(dataRootPath_)) {
-    fmt::print(stdout, "directory {} not exists, creating...\n", dataRootPath_.c_str());
+  dataPath_ = systemPath_ / "data" / instanceName_;
+  if (!exists(dataPath_)) {
+    fmt::print(stdout, "directory {} not exists, creating...\n", dataPath_.c_str());
     // TODO
     // std::create_directories(instanceDataPath_);
   }
 
 #if 0
-  if (auto const rc = ::chdir(dataRootPath_.c_str()); rc == -1) {
+  if (auto const rc = ::chdir(dataPath_.c_str()); rc == -1) {
     throw std::system_error{makePosixErrorCode(errno), "Failed to change current directory"};
   }
 #endif
@@ -93,7 +93,7 @@ Environment::Environment(std::string instanceName) : Environment{std::move(insta
 
 auto Environment::findConfigFile(std::string_view filename) const noexcept
     -> std::expected<std::filesystem::path, std::error_code> {
-  auto const configPath = systemRootPath_ / "config";
+  auto const configPath = systemPath_ / "config";
   if (!is_directory(configPath)) {
     return std::unexpected(makePosixErrorCode(ENOENT));
   }

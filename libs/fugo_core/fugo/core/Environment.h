@@ -17,9 +17,9 @@ class Environment {
 private:
   std::string instanceName_;
   std::string scope_;
-  std::filesystem::path selfPath_;
-  std::filesystem::path systemRootPath_;
-  std::filesystem::path dataRootPath_;
+  std::filesystem::path binaryPath_;
+  std::filesystem::path systemPath_;
+  std::filesystem::path dataPath_;
 
 public:
   Environment(Environment const&) = default;
@@ -45,24 +45,22 @@ public:
   }
 
   /// Return path to self binary (obtained from /proc/self/exe)
-  [[nodiscard]] auto selfPath() const noexcept -> std::filesystem::path const& {
-    return selfPath_;
+  [[nodiscard]] auto binaryPath() const noexcept -> std::filesystem::path const& {
+    return binaryPath_;
   }
 
-  /// Return path to system root
-  [[nodiscard]] auto systemRootPath() const noexcept -> std::filesystem::path const& {
-    return systemRootPath_;
+  /// Return path to system
+  [[nodiscard]] auto systemPath() const noexcept -> std::filesystem::path const& {
+    return systemPath_;
   }
 
-  /// Return path to instance data root path
-  [[nodiscard]] auto dataRootPath() const noexcept -> std::filesystem::path const& {
-    return dataRootPath_;
+  /// Return path to data path
+  [[nodiscard]] auto dataPath() const noexcept -> std::filesystem::path const& {
+    return dataPath_;
   }
 
   /// Find config file
   /// @param[in] filename is filename
-  ///
-  /// Find a file in @c systemRootPath / current
   [[nodiscard]] auto findConfigFile(std::string_view filename) const noexcept
       -> std::expected<std::filesystem::path, std::error_code>;
 };
