@@ -10,12 +10,15 @@
 namespace fugo::core {
 
 TEST_CASE("Environment") {
-  std::print("scope: {}\n", env()->scope());
-  std::print("selfPath: {}\n", env()->selfPath().c_str());
-  std::print("selfFilename: {}\n", env()->selfPath().filename().c_str());
-  std::print("systemRoot: {}\n", env()->systemRootPath().c_str());
+  auto const env = Environment("unit_test");
 
-  if (auto const result = env()->findConfigFile("xxx"); result) {
+  std::print("scope: {}\n", env.scope());
+  std::print("selfPath: {}\n", env.selfPath().c_str());
+  std::print("selfFilename: {}\n", env.selfPath().filename().c_str());
+  std::print("systemRoot: {}\n", env.systemRootPath().c_str());
+  std::print("dataRootPath: {}\n", env.dataRootPath().c_str());
+
+  if (auto const result = env.findConfigFile("xxx"); result) {
     std::print("found(xxx): {}\n", result.value().c_str());
   }
 }

@@ -59,36 +59,50 @@ namespace {
 
 } // namespace
 
-Environment::Environment(std::string scope) : scope_{scope} {
+Environment::Environment(std::string instanceName, std::string scope)
+    : instanceName_{std::move(instanceName)}, scope_{std::move(scope)} {
+  if (instanceName_.empty()) {
+    throw std::system_error{makePosixErrorCode(EINVAL), "Empty instance name"};
+  }
   if (auto result = getSelfPath(); result) {
     selfPath_ = result.value();
   } else {
-    fmt::print(stderr, "Failed to obtain self binary path: {}\n", result.error().message());
+    throw std::system_error{result.error(), "Failed to obtain self binary path"};
   }
   if (auto const result = getSystemRoot(); result) {
     systemRootPath_ = result.value();
   } else {
-    fmt::print(stderr, "Failed to obtain system root path: {}\n", result.error().message());
+    throw std::system_error{result.error(), "Failed to obtain system root path"};
   }
+
+  dataRootPath_ = systemRootPath_ / "data" / instanceName_;
+  if (!exists(dataRootPath_)) {
+    fmt::print(stdout, "directory {} not exists, creating...\n", dataRootPath_.c_str());
+    // TODO
+    // std::create_directories(instanceDataPath_);
+  }
+
+#if 0
+  if (auto const rc = ::chdir(dataRootPath_.c_str()); rc == -1) {
+    throw std::system_error{makePosixErrorCode(errno), "Failed to change current directory"};
+  }
+#endif
 }
 
-Environment::Environment() : Environment{getDefaultScope()} {}
+Environment::Environment(std::string instanceName) : Environment{std::move(instanceName), getDefaultScope()} {}
 
-void Environment::prepareInstance(std::string const& name) {
-  //
-}
-
-auto Environment::findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path> {
+auto Environment::findConfigFile(std::string_view filename) const noexcept
+    -> std::expected<std::filesystem::path, std::error_code> {
   auto const configPath = systemRootPath_ / "config";
   if (!is_directory(configPath)) {
-    return std::nullopt;
+    return std::unexpected(makePosixErrorCode(ENOENT));
   }
   for (std::filesystem::path const& entry : std::filesystem::directory_iterator{configPath}) {
     if (entry.filename() == filename) {
-      return entry;
+      return {entry};
     }
   }
-  return std::nullopt;
+  return std::unexpected(makePosixErrorCode(ENOENT));
 }
 
 } // namespace fugo::core

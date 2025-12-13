@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include <expected>
 #include <filesystem>
 #include <string>
+#include <system_error>
 
 #include "Platform.h"
 
@@ -13,20 +15,29 @@ namespace core {
 
 class Environment {
 private:
+  std::string instanceName_;
   std::string scope_;
   std::filesystem::path selfPath_;
   std::filesystem::path systemRootPath_;
+  std::filesystem::path dataRootPath_;
 
 public:
   Environment(Environment const&) = default;
   Environment& operator=(Environment const&) = default;
 
   /// Construct environment
+  /// @param[in] instanceName is current instance name
   /// @param[in] scope is environment scope
-  Environment(std::string scope);
+  /// @throw std::system_error
+  Environment(std::string instanceName, std::string scope);
 
   /// Construct environment with default scope
-  Environment();
+  Environment(std::string instanceName);
+
+  /// Get instance name
+  [[nodiscard]] auto instanceName() const noexcept -> std::string const& {
+    return instanceName_;
+  }
 
   /// Get environment scope
   [[nodiscard]] auto scope() const noexcept -> std::string const& {
@@ -43,25 +54,18 @@ public:
     return systemRootPath_;
   }
 
-  /// Prepare instance, throws on error
-  /// @param[in] name is instance name
-  ///
-  /// Create necessary directories
-  /// Change current directory
-  void prepareInstance(std::string const& name);
+  /// Return path to instance data root path
+  [[nodiscard]] auto dataRootPath() const noexcept -> std::filesystem::path const& {
+    return dataRootPath_;
+  }
 
   /// Find config file
   /// @param[in] filename is filename
   ///
   /// Find a file in @c systemRootPath / current
-  [[nodiscard]] auto findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path>;
+  [[nodiscard]] auto findConfigFile(std::string_view filename) const noexcept
+      -> std::expected<std::filesystem::path, std::error_code>;
 };
-
-/// Get default environment
-[[nodiscard]] FUGO_FORCE_INLINE auto env() -> Environment* {
-  static Environment instance;
-  return &instance;
-}
 
 } // namespace core
 
