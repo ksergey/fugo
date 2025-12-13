@@ -43,10 +43,17 @@ public:
     return systemRootPath_;
   }
 
-  // TODO: DATA path
-  // TODO: set current path (::chdir) (and create)
+  /// Prepare instance, throws on error
+  /// @param[in] name is instance name
+  ///
+  /// Create necessary directories
+  /// Change current directory
+  void prepareInstance(std::string const& name);
 
-  /// Find config file in config dir
+  /// Find config file
+  /// @param[in] filename is filename
+  ///
+  /// Find a file in @c systemRootPath / current
   [[nodiscard]] auto findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path>;
 };
 

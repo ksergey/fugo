@@ -74,6 +74,10 @@ Environment::Environment(std::string scope) : scope_{scope} {
 
 Environment::Environment() : Environment{getDefaultScope()} {}
 
+void Environment::prepareInstance(std::string const& name) {
+  //
+}
+
 auto Environment::findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path> {
   auto const configPath = systemRootPath_ / "config";
   if (!is_directory(configPath)) {
