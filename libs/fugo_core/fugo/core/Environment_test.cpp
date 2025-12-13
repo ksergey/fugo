@@ -10,9 +10,10 @@
 namespace fugo::core {
 
 TEST_CASE("Environment") {
-  auto const env = Environment("test");
-  REQUIRE_EQ(env.instanceName(), "test");
-  REQUIRE_EQ(env.scope(), Environment::getDefaultScope());
+  std::print("scope: {}\n", env()->scope());
+  std::print("homePath: {}\n", env()->homePath().c_str());
+  std::print("binaryPath: {}\n", env()->binaryPath().c_str());
+  std::print("filename: {}\n", env()->binaryPath().filename().c_str());
 }
 
 } // namespace fugo::core

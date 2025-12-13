@@ -4,44 +4,51 @@
 #pragma once
 
 #include <filesystem>
-#include <optional>
 #include <string>
+
+#include "Platform.h"
 
 namespace fugo {
 namespace core {
 
 class Environment {
 private:
-  std::string instanceName_;
   std::string scope_;
-  std::filesystem::path root_;
+  std::filesystem::path homePath_;
+  std::filesystem::path binaryPath_;
 
 public:
   Environment(Environment const&) = default;
   Environment& operator=(Environment const&) = default;
-  Environment(Environment&&) = default;
-  Environment& operator=(Environment&&) = default;
 
-  Environment(std::string instanceName, std::string scope = getDefaultScope());
+  Environment(std::string scope);
 
-  virtual ~Environment();
-
-  /// Get instance name
-  [[nodiscard]] auto instanceName() const noexcept -> std::string const& {
-    return instanceName_;
-  }
+  Environment();
 
   /// Get environment scope
   [[nodiscard]] auto scope() const noexcept -> std::string const& {
     return scope_;
   }
 
+  /// Return path to home directory
+  [[nodiscard]] auto homePath() const noexcept -> std::filesystem::path const& {
+    return homePath_;
+  }
+
+  /// Return path to current binary
+  [[nodiscard]] auto binaryPath() const noexcept -> std::filesystem::path const& {
+    return binaryPath_;
+  }
+
   /// Find file in current environment
   [[nodiscard]] auto findFile(std::string_view filename) -> std::optional<std::filesystem::path>;
-
-  /// Get default scope (or namespace)
-  [[nodiscard]] static auto getDefaultScope() noexcept -> std::string const&;
 };
+
+/// Get default environment
+[[nodiscard]] FUGO_FORCE_INLINE auto env() -> Environment* {
+  static Environment instance;
+  return &instance;
+}
 
 } // namespace core
 
