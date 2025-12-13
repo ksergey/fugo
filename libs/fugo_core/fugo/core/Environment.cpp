@@ -8,6 +8,7 @@
 #include <cstring>
 #include <filesystem>
 #include <optional>
+#include <ranges>
 #include <unistd.h>
 
 #include <fmt/format.h>
@@ -37,7 +38,7 @@ namespace {
   return std::unexpected(makePosixErrorCode(ENOENT));
 }
 
-[[nodiscard]] auto getBinaryPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
+[[nodiscard]] auto getSelfPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
   char buffer[PATH_MAX];
   if (auto const rc = ::readlink("/proc/self/exe", buffer, sizeof(buffer)); rc != -1) {
     return std::filesystem::path{std::string{buffer, static_cast<std::size_t>(rc)}};
@@ -46,24 +47,43 @@ namespace {
   }
 }
 
+[[nodiscard]] auto getSystemRoot() noexcept -> std::expected<std::filesystem::path, std::error_code> {
+  if (auto const value = std::getenv("FUGO_SYSTEM_ROOT"); value != nullptr) {
+    return std::filesystem::path{value};
+  }
+  if (auto const result = getHomePath(); result) {
+    return std::filesystem::path{result.value()} / "current";
+  }
+  return std::unexpected(makePosixErrorCode(ENOENT));
+}
+
 } // namespace
 
 Environment::Environment(std::string scope) : scope_{scope} {
-  if (auto rc = getHomePath(); rc) {
-    homePath_ = rc.value();
+  if (auto result = getSelfPath(); result) {
+    selfPath_ = result.value();
   } else {
-    fmt::print(stderr, "Failed to obtain home path: {}\n", rc.error().message());
+    fmt::print(stderr, "Failed to obtain self binary path: {}\n", result.error().message());
   }
-  if (auto rc = getBinaryPath(); rc) {
-    binaryPath_ = rc.value();
+  if (auto const result = getSystemRoot(); result) {
+    systemRootPath_ = result.value();
   } else {
-    fmt::print(stderr, "Failed to obtain this binary path: {}\n", rc.error().message());
+    fmt::print(stderr, "Failed to obtain system root path: {}\n", result.error().message());
   }
 }
 
 Environment::Environment() : Environment{getDefaultScope()} {}
 
-auto Environment::findFile(std::string_view filename) -> std::optional<std::filesystem::path> {
+auto Environment::findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path> {
+  auto const configPath = systemRootPath_ / "config";
+  if (!is_directory(configPath)) {
+    return std::nullopt;
+  }
+  for (std::filesystem::path const& entry : std::filesystem::directory_iterator{configPath}) {
+    if (entry.filename() == filename) {
+      return entry;
+    }
+  }
   return std::nullopt;
 }
 

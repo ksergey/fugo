@@ -14,15 +14,18 @@ namespace core {
 class Environment {
 private:
   std::string scope_;
-  std::filesystem::path homePath_;
-  std::filesystem::path binaryPath_;
+  std::filesystem::path selfPath_;
+  std::filesystem::path systemRootPath_;
 
 public:
   Environment(Environment const&) = default;
   Environment& operator=(Environment const&) = default;
 
+  /// Construct environment
+  /// @param[in] scope is environment scope
   Environment(std::string scope);
 
+  /// Construct environment with default scope
   Environment();
 
   /// Get environment scope
@@ -30,18 +33,21 @@ public:
     return scope_;
   }
 
-  /// Return path to home directory
-  [[nodiscard]] auto homePath() const noexcept -> std::filesystem::path const& {
-    return homePath_;
+  /// Return path to self binary (obtained from /proc/self/exe)
+  [[nodiscard]] auto selfPath() const noexcept -> std::filesystem::path const& {
+    return selfPath_;
   }
 
-  /// Return path to current binary
-  [[nodiscard]] auto binaryPath() const noexcept -> std::filesystem::path const& {
-    return binaryPath_;
+  /// Return path to system root
+  [[nodiscard]] auto systemRootPath() const noexcept -> std::filesystem::path const& {
+    return systemRootPath_;
   }
 
-  /// Find file in current environment
-  [[nodiscard]] auto findFile(std::string_view filename) -> std::optional<std::filesystem::path>;
+  // TODO: DATA path
+  // TODO: set current path (::chdir) (and create)
+
+  /// Find config file in config dir
+  [[nodiscard]] auto findConfigFile(std::string_view filename) -> std::optional<std::filesystem::path>;
 };
 
 /// Get default environment
