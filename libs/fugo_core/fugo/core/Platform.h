@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <turboq/platform.h>
+#include <turboq/Platform.h>
 
 /// @see <turboq/platform.h>
 #define FUGO_FORCE_INLINE TURBOQ_FORCE_INLINE

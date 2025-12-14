@@ -63,6 +63,10 @@ public:
   /// @param[in] filename is filename
   [[nodiscard]] auto findConfigFile(std::string_view filename) const noexcept
       -> std::expected<std::filesystem::path, std::error_code>;
+
+  // TODO
+  // auto createSender()
+  // auto createReceiver()
 };
 
 } // namespace core
