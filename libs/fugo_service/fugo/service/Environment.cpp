@@ -13,9 +13,9 @@
 
 #include <fmt/format.h>
 
-#include "PosixError.h"
+#include <fugo/core/PosixError.h>
 
-namespace fugo::core {
+namespace fugo::service {
 namespace {
 
 [[nodiscard]] auto getDefaultScope() noexcept -> std::string {
@@ -105,4 +105,4 @@ auto Environment::findConfigFile(std::string_view filename) const noexcept
   return std::unexpected(makePosixErrorCode(ENOENT));
 }
 
-} // namespace fugo::core
+} // namespace fugo::service

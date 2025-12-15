@@ -8,10 +8,9 @@
 #include <string>
 #include <system_error>
 
-#include "Platform.h"
+#include <fugo/core/Platform.h>
 
-namespace fugo {
-namespace core {
+namespace fugo::service {
 
 class Environment {
 private:
@@ -69,8 +68,4 @@ public:
   // auto createReceiver()
 };
 
-} // namespace core
-
-using namespace core;
-
-} // namespace fugo
+} // namespace fugo::service

@@ -7,7 +7,7 @@
 
 #include "Environment.h"
 
-namespace fugo::core {
+namespace fugo::service {
 
 TEST_CASE("Environment") {
   auto const env = Environment("unit_test");
@@ -23,4 +23,4 @@ TEST_CASE("Environment") {
   }
 }
 
-} // namespace fugo::core
+} // namespace fugo::service
