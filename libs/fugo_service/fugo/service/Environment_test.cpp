@@ -10,7 +10,7 @@
 namespace fugo::service {
 
 TEST_CASE("Environment") {
-  auto const env = Environment("unit_test");
+  auto const env = Environment{{}, {}};
 
   std::print("scope: {}\n", env.scope());
   std::print("binaryPath: {}\n", env.binaryPath().c_str());
@@ -18,7 +18,7 @@ TEST_CASE("Environment") {
   std::print("system path: {}\n", env.systemPath().c_str());
   std::print("data path: {}\n", env.dataPath().c_str());
 
-  if (auto const result = env.findConfigFile("xxx"); result) {
+  if (auto const result = env.findFile("xxx"); result) {
     std::print("found(xxx): {}\n", result.value().c_str());
   }
 }

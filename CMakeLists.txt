@@ -30,3 +30,4 @@ add_subdirectory(deps/sbe-code-gen)
 enable_testing()
 
 add_subdirectory(libs)
+add_subdirectory(examples)

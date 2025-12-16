@@ -8,6 +8,8 @@
 #include <string>
 #include <system_error>
 
+#include <turboq/MemorySource.h>
+
 #include <fugo/core/Platform.h>
 
 namespace fugo::service {
@@ -19,6 +21,7 @@ private:
   std::filesystem::path binaryPath_;
   std::filesystem::path systemPath_;
   std::filesystem::path dataPath_;
+  turboq::DefaultMemorySource memorySource_;
 
 public:
   Environment(Environment const&) = default;
@@ -28,10 +31,7 @@ public:
   /// @param[in] instanceName is current instance name
   /// @param[in] scope is environment scope
   /// @throw std::system_error
-  Environment(std::string instanceName, std::string scope);
-
-  /// Construct environment with default scope
-  Environment(std::string instanceName);
+  Environment(std::string instanceName = {}, std::string scope = getDefaultScope());
 
   /// Get instance name
   [[nodiscard]] auto instanceName() const noexcept -> std::string const& {
@@ -58,14 +58,18 @@ public:
     return dataPath_;
   }
 
+  /// Return MemorySource for turboq queues
+  [[nodiscard]] auto memorySource() const noexcept -> turboq::MemorySource const& {
+    return memorySource_;
+  }
+
   /// Find config file
   /// @param[in] filename is filename
-  [[nodiscard]] auto findConfigFile(std::string_view filename) const noexcept
+  [[nodiscard]] auto findFile(std::string_view filename) const noexcept
       -> std::expected<std::filesystem::path, std::error_code>;
 
-  // TODO
-  // auto createSender()
-  // auto createReceiver()
+  /// Get default scope
+  [[nodiscard]] static auto getDefaultScope() noexcept -> std::string;
 };
 
 } // namespace fugo::service
