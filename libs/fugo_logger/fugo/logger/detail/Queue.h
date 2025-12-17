@@ -12,10 +12,10 @@
 
 #include <fugo/core/Platform.h>
 #include <fugo/core/TypeTraits.h>
-#include <turboq/BoundedSPSCRawQueue.h>
 
 #include "../Codec.h"
 #include "../Common.h"
+#include "BoundedSPSCRawQueue.h"
 
 namespace fugo::logger::detail {
 
@@ -27,30 +27,10 @@ enum class EnqueuePolicy {
 
 struct Queue {
   /// Queue producer
-  struct Producer : public turboq::BoundedSPSCRawQueue::Producer {
-    using turboq::BoundedSPSCRawQueue::Producer::Producer;
+  struct Producer : public BoundedSPSCRawQueue::Producer {
+    using BoundedSPSCRawQueue::Producer::Producer;
 
-    Producer(turboq::BoundedSPSCRawQueue::Producer producer) noexcept
-        : turboq::BoundedSPSCRawQueue::Producer(std::move(producer)) {}
-
-    /// Return true on producer side closed
-    [[nodiscard]] auto closed() const noexcept -> bool {
-      return static_cast<bool>(*this) == false;
-    }
-    [[nodiscard]] auto isClosed() const noexcept -> bool {
-      return static_cast<bool>(*this) == false;
-    }
-
-    /// Close producer side and notify consumer side
-    void close() {
-      constexpr auto bufferSize = Codec<RecordHeader>::encodedSize();
-      this->enqueue<EnqueuePolicy::Retry>(bufferSize, [](std::byte* dst) noexcept {
-        Codec<RecordHeader>::encode(dst, RecordHeader{.type = EventType::Close});
-      });
-
-      // Destroy producer
-      *this = {};
-    }
+    Producer(BoundedSPSCRawQueue::Producer producer) noexcept : BoundedSPSCRawQueue::Producer(std::move(producer)) {}
 
     /// Enqueue a data into queue
     template <EnqueuePolicy Policy = EnqueuePolicy::Drop, typename Fn>
@@ -79,24 +59,10 @@ struct Queue {
   };
 
   /// Queue consumer
-  struct Consumer : public turboq::BoundedSPSCRawQueue::Consumer {
-    using turboq::BoundedSPSCRawQueue::Consumer::Consumer;
+  struct Consumer : public BoundedSPSCRawQueue::Consumer {
+    using BoundedSPSCRawQueue::Consumer::Consumer;
 
-    Consumer(turboq::BoundedSPSCRawQueue::Consumer consumer) noexcept
-        : turboq::BoundedSPSCRawQueue::Consumer(std::move(consumer)) {}
-
-    /// Return true on consumer side closed
-    [[nodiscard]] auto closed() const noexcept -> bool {
-      return static_cast<bool>(*this) == false;
-    }
-    [[nodiscard]] auto isClosed() const noexcept -> bool {
-      return static_cast<bool>(*this) == false;
-    }
-
-    /// Close consumer side
-    void close() noexcept {
-      *this = {};
-    }
+    Consumer(BoundedSPSCRawQueue::Consumer consumer) noexcept : BoundedSPSCRawQueue::Consumer(std::move(consumer)) {}
 
     template <typename Fn>
     FUGO_FORCE_INLINE auto dequeue(Fn&& fn) -> bool {
@@ -117,8 +83,8 @@ struct Queue {
   [[nodiscard]] static auto createProducerAndConsumer(std::string_view name, std::size_t capacityHint) noexcept
       -> std::tuple<Producer, Consumer> {
     try {
-      auto const options = turboq::BoundedSPSCRawQueue::CreationOptions{.capacityHint = capacityHint};
-      auto queue = turboq::BoundedSPSCRawQueue(name, options, turboq::AnonymousMemorySource());
+      auto const options = BoundedSPSCRawQueue::CreationOptions{.capacityHint = capacityHint};
+      auto queue = BoundedSPSCRawQueue(name, options);
       return std::make_tuple<Producer, Consumer>(queue.createProducer(), queue.createConsumer());
     } catch (std::exception const& e) {
       fmt::print(stderr, "failed to create producer and consumer: {}\n", e.what());

@@ -29,7 +29,7 @@ auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexc
 void QueueManager::rebuildQueues() {
   // Drop closed queues
   std::erase_if(queues_, [](Queue::Consumer const& consumer) {
-    return consumer.closed();
+    return consumer.isClosed();
   });
 
   // Add pending queues
