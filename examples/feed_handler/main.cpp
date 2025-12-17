@@ -10,8 +10,11 @@
 #include <fugo/service/Logger.h>
 
 #include "Config.h"
+#include "Process.h"
 
 int main(int argc, char* argv[]) {
+  using namespace app;
+
   try {
     auto options = cxxopts::Options{"FeedHandler", "Demonstration of FeedHandler app"};
 
@@ -34,7 +37,7 @@ int main(int argc, char* argv[]) {
       throw std::runtime_error{"Missed required option \"--config\""};
     }
 
-    auto const config = app::Config{result["config"].as<std::filesystem::path>()};
+    auto const config = Config{result["config"].as<std::filesystem::path>()};
     if (result.count("print")) {
       fmt::print(stderr, "{}", config.toString());
       return EXIT_FAILURE;
@@ -50,6 +53,8 @@ int main(int argc, char* argv[]) {
     }
 
     logAlwaysF("Config:\n{}", config.toString());
+
+    Process{config, env}.runInLoop();
 
   } catch (std::exception const& e) {
     if (fugo::service::isLoggerReady()) {
