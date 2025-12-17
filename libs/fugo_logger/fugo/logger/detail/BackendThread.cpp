@@ -3,6 +3,8 @@
 
 #include "BackendThread.h"
 
+#include <ranges>
+
 #include <fmt/format.h>
 
 #include <fugo/core/LoopRateLimit.h>
@@ -115,10 +117,13 @@ void BackendThread::processLogRecord(
 
   formatBuffer_.resize(0);
   fmt::vformat_to(std::back_inserter(formatBuffer_), metadata->format, store);
-  auto const message = std::string_view(formatBuffer_.data(), formatBuffer_.size());
+  auto const lines = std::string{formatBuffer_.data(), formatBuffer_.size()};
 
-  sink.write(*metadata->location, metadata->level, Clock::toTimeSpec(logRecordHeader->timestamp),
-      logRecordHeader->threadID, message);
+  constexpr auto kLineDelim = std::string_view{"\n"};
+  for (auto const message : std::views::split(lines, kLineDelim)) {
+    sink.write(*metadata->location, metadata->level, Clock::toTimeSpec(logRecordHeader->timestamp),
+        logRecordHeader->threadID, std::string_view{message});
+  }
 }
 
 } // namespace fugo::logger::detail

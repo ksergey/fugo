@@ -29,6 +29,7 @@ constexpr auto toShortString(LogLevel level) noexcept -> std::string_view {
   using namespace std::string_view_literals;
 
   switch (level) {
+  case LogLevel::Always: return "-"sv;
   case LogLevel::Error: return "E"sv;
   case LogLevel::Warning: return "W"sv;
   case LogLevel::Notice: return "I"sv;

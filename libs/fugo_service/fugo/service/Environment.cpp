@@ -25,15 +25,6 @@ namespace {
   return std::unexpected(makePosixErrorCode(ENOENT));
 }
 
-[[nodiscard]] auto getBinaryPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
-  char buffer[PATH_MAX];
-  if (auto const rc = ::readlink("/proc/self/exe", buffer, sizeof(buffer)); rc != -1) {
-    return std::filesystem::path{std::string{buffer, static_cast<std::size_t>(rc)}};
-  } else {
-    return std::unexpected(makePosixErrorCode(errno));
-  }
-}
-
 [[nodiscard]] auto getSystemPath() noexcept -> std::expected<std::filesystem::path, std::error_code> {
   if (auto const value = std::getenv("FUGO_SYSTEM_PATH"); value != nullptr) {
     return std::filesystem::path{value};
@@ -48,12 +39,6 @@ namespace {
 
 Environment::Environment(std::string instanceName, std::string scope)
     : instanceName_{std::move(instanceName)}, scope_{std::move(scope)} {
-  if (auto result = getBinaryPath(); result) {
-    binaryPath_ = result.value();
-  } else {
-    throw std::system_error{result.error(), "Failed to obtain binary path"};
-  }
-
   if (auto const result = getSystemPath(); result) {
     systemPath_ = result.value();
   } else {

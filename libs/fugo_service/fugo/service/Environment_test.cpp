@@ -13,8 +13,6 @@ TEST_CASE("Environment") {
   auto const env = Environment{{}, {}};
 
   std::print("scope: {}\n", env.scope());
-  std::print("binaryPath: {}\n", env.binaryPath().c_str());
-  std::print("binaryFilename: {}\n", env.binaryPath().filename().c_str());
   std::print("system path: {}\n", env.systemPath().c_str());
   std::print("data path: {}\n", env.dataPath().c_str());
 

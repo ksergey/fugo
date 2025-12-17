@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <expected>
 #include <filesystem>
 #include <optional>
@@ -227,6 +228,19 @@ struct JsonMapping<std::optional<T>> {
     } else {
       JsonMapping<T>::write(json, *value);
     }
+  }
+};
+
+/// Mapping for std::chrono::duration
+template <typename Rep, typename Period>
+struct JsonMapping<std::chrono::duration<Rep, Period>> {
+  static void read(nlohmann::json const& json, std::chrono::duration<Rep, Period>& value) {
+    Rep rep;
+    JsonMapping<Rep>::read(json, rep);
+    value = std::chrono::duration<Rep, Period>{rep};
+  }
+  static void write(nlohmann::json& json, std::chrono::duration<Rep, Period> const& value) {
+    JsonMapping<Rep>::write(json, value.count());
   }
 };
 

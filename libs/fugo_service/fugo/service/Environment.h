@@ -18,7 +18,6 @@ class Environment {
 private:
   std::string instanceName_;
   std::string scope_;
-  std::filesystem::path binaryPath_;
   std::filesystem::path systemPath_;
   std::filesystem::path dataPath_;
   turboq::DefaultMemorySource memorySource_;
@@ -41,11 +40,6 @@ public:
   /// Get environment scope
   [[nodiscard]] auto scope() const noexcept -> std::string const& {
     return scope_;
-  }
-
-  /// Return path to self binary (obtained from /proc/self/exe)
-  [[nodiscard]] auto binaryPath() const noexcept -> std::filesystem::path const& {
-    return binaryPath_;
   }
 
   /// Return path to system

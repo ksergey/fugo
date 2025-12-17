@@ -12,7 +12,7 @@ target_compile_options(${TargetName}
 target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PUBLIC fugo::core fmt::fmt)
+  PUBLIC fmt::fmt fugo::core fugo::logger)
 
 add_library(fugo::service ALIAS ${TargetName})
 

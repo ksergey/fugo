@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <string>
 
+#include <fugo/service/Logger.h>
+
 namespace app {
 
 struct ServiceConfig {
@@ -17,10 +19,17 @@ struct ServiceConfig {
   std::size_t commandQueueLengthHint;
 };
 
+struct LoggerConfig : fugo::service::LoggerOptions {};
+
 struct Config {
   ServiceConfig service;
+  LoggerConfig logger;
 
+  /// Load config from json file
   Config(std::filesystem::path const& path);
+
+  /// Serialize to string
+  [[nodiscard]] auto toString() const -> std::string;
 };
 
 } // namespace app

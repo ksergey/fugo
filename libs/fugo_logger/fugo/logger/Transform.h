@@ -57,11 +57,6 @@ template <typename T>
   requires std::is_same_v<T, struct ::tm>
 struct Transform<T> : detail::TransformNone<T> {};
 
-/// String
-template <typename T>
-  requires std::is_same_v<T, std::string>
-struct Transform<T> : detail::TransformNone<T> {};
-
 /// String-like
 template <typename T>
   requires(std::convertible_to<T, std::string_view> && !std::is_same_v<T, std::nullptr_t>)

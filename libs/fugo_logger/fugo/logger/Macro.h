@@ -30,12 +30,14 @@
     }                                                                                                                  \
   } while (0)
 
+#define logAlways(...) FUGO_LOG(Always, 0, __VA_ARGS__)
 #define logError(...) FUGO_LOG(Error, 0, __VA_ARGS__)
 #define logWarning(...) FUGO_LOG(Warning, 0, __VA_ARGS__)
 #define logNotice(...) FUGO_LOG(Notice, 0, __VA_ARGS__)
 #define logDebug(...) FUGO_LOG(Debug, 0, __VA_ARGS__)
 #define logTrace(...) FUGO_LOG(Trace, 0, __VA_ARGS__)
 
+#define logAlwaysF(...) FUGO_LOG(Always, fugo::logger::kFlagRety, __VA_ARGS__)
 #define logErrorF(...) FUGO_LOG(Error, fugo::logger::kFlagRety, __VA_ARGS__)
 #define logWarningF(...) FUGO_LOG(Warning, fugo::logger::kFlagRety, __VA_ARGS__)
 #define logNoticeF(...) FUGO_LOG(Notice, fugo::logger::kFlagRety, __VA_ARGS__)

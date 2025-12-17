@@ -17,7 +17,7 @@
 namespace fugo::logger {
 
 /// Log entry verbosity level
-enum class LogLevel { Error, Warning, Notice, Debug, Trace };
+enum class LogLevel { Always, Error, Warning, Notice, Debug, Trace };
 
 /// Decode args function signature
 using DecodeArgsFn = std::add_pointer_t<void(std::byte const*, fmt::dynamic_format_arg_store<fmt::format_context>*)>;
