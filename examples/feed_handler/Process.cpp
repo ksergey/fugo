@@ -15,6 +15,8 @@ Process::~Process() {
   logNotice("Process destroyed");
 }
 
-void Process::runInLoop() {}
+void Process::runInLoop() {
+  // TODO: signal handlers
+}
 
 } // namespace app
