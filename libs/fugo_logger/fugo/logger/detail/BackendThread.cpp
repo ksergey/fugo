@@ -12,7 +12,7 @@
 
 namespace fugo::logger::detail {
 
-BackendThread::BackendThread(QueueManager& queueManager) : queueManager_{queueManager} {}
+BackendThread::BackendThread(LoggerQueueManager& queueManager) : queueManager_{queueManager} {}
 
 BackendThread::~BackendThread() {
   this->stop();
@@ -69,10 +69,10 @@ auto BackendThread::processIncomingLogRecords(Sink& sink) -> std::size_t {
 
   auto doFlush = false;
 
-  queueManager_.forEachConsumer([&](Queue::Consumer* consumer) {
-    auto doCloseQueue = false;
+  queueManager_.forEachConsumer([&](LoggerQueue::Consumer* consumer) {
+    // Dequeue all available messages
     while (true) {
-      auto success = consumer->dequeue([&](std::byte const* src) {
+      auto const success = consumer->dequeue([&](std::byte const* src) {
         ++count;
         auto const event = Codec<RecordHeader>::decode(src);
 
@@ -83,18 +83,12 @@ auto BackendThread::processIncomingLogRecords(Sink& sink) -> std::size_t {
           this->processLogRecord(sink, &logRecordHeader, metadata, src);
           doFlush = true;
         } break;
-        case EventType::Close: {
-          doCloseQueue = true;
-        } break;
         default: break;
         }
       });
       if (!success) {
         break;
       }
-    }
-    if (doCloseQueue) {
-      consumer->close();
     }
   });
 

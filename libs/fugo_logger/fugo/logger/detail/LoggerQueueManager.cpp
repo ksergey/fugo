@@ -1,18 +1,18 @@
 // Copyright (c) Sergey Kovalevich <inndie@gmail.com>
 // SPDX-License-Identifier: AGPL-3.0
 
-#include "QueueManager.h"
+#include "LoggerQueueManager.h"
 
 #include <mutex>
 
 namespace fugo::logger::detail {
 
-auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexcept -> Queue::Producer {
+auto LoggerQueueManager::createProducer(std::optional<std::size_t> capacityHint) noexcept -> LoggerQueue::Producer {
   if (!capacityHint) {
     capacityHint = this->queueCapacityHint();
   }
 
-  auto [producer, consumer] = Queue::createProducerAndConsumer("logger-queue", *capacityHint);
+  auto [producer, consumer] = LoggerQueue::createProducerAndConsumer("logger-queue", *capacityHint);
   if (!producer || !consumer) {
     return {};
   }
@@ -26,16 +26,18 @@ auto QueueManager::createProducer(std::optional<std::size_t> capacityHint) noexc
   return std::move(producer);
 }
 
-void QueueManager::rebuildQueues() {
+void LoggerQueueManager::rebuildQueues() {
   // Drop closed queues
-  std::erase_if(queues_, [](Queue::Consumer const& consumer) {
+  std::erase_if(queues_, [](LoggerQueue::Consumer const& consumer) {
+    assert(static_cast<bool>(consumer));
     return consumer.isClosed();
   });
 
   // Add pending queues
   std::lock_guard guard(pendingAddQueuesLock_);
   if (!pendingAddQueues_.empty()) {
-    for (Queue::Consumer& consumer : pendingAddQueues_) {
+    for (LoggerQueue::Consumer& consumer : pendingAddQueues_) {
+      assert(static_cast<bool>(consumer));
       queues_.push_back(std::move(consumer));
     }
     pendingAddQueues_.clear();

@@ -47,10 +47,7 @@ static_assert(std::is_trivially_copyable_v<RecordMetadata>);
 ///
 /// @c EventType::LogRecord
 ///   layout: RecordHeader{ .type = EventType::LogRecord } | LogRecordHeader | RecordMetadata* | Args...
-///
-/// @c EventType::Close
-///   layout: RecordHeader{ .type = EventType::Close }
-enum EventType { LogRecord, Close };
+enum EventType { LogRecord };
 
 /// Log event header
 struct RecordHeader {

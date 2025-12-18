@@ -12,13 +12,13 @@
 
 #include "../BackendOptions.h"
 #include "../Sink.h"
-#include "QueueManager.h"
+#include "LoggerQueueManager.h"
 
 namespace fugo::logger::detail {
 
 class BackendThread final {
 private:
-  QueueManager& queueManager_;
+  LoggerQueueManager& queueManager_;
   // Backend thread
   std::jthread thread_;
   // Flag indicates backend thread running
@@ -31,7 +31,7 @@ public:
   BackendThread& operator=(BackendThread const&) = delete;
 
   /// Constructor
-  explicit BackendThread(QueueManager& queueManager);
+  explicit BackendThread(LoggerQueueManager& queueManager);
 
   /// Destructor
   ~BackendThread();

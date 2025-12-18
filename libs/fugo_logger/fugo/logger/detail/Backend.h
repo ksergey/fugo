@@ -21,8 +21,8 @@ class Backend {
 private:
   alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
   std::once_flag shutdownHandlesInstalledFlag_;
-  QueueManager queueManager_;
-  BackendThread backendThread_{queueManager_};
+  LoggerQueueManager loggerQueueManager_;
+  BackendThread backendThread_{loggerQueueManager_};
   std::mutex backendThreadMutex_;
 
 public:
@@ -51,17 +51,17 @@ public:
 
   /// Queue capacity hint
   [[nodiscard]] FUGO_FORCE_INLINE auto queueCapacityHint() const noexcept -> std::size_t {
-    return queueManager_.queueCapacityHint();
+    return loggerQueueManager_.queueCapacityHint();
   }
 
   /// Change queue capacity hint
   void setQueueCapacityHint(std::size_t value) {
-    queueManager_.setQueueCapacityHint(value);
+    loggerQueueManager_.setQueueCapacityHint(value);
   }
 
   /// Get ThreadContext for current thread
   [[nodiscard]] FUGO_FORCE_INLINE auto localThreadContext() noexcept -> ThreadContext* {
-    static thread_local auto threadContext = ThreadContext{queueManager_};
+    static thread_local auto threadContext = ThreadContext{loggerQueueManager_};
     return &threadContext;
   }
 

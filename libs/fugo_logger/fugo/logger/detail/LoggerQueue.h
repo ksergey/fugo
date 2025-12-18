@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include <immintrin.h>
+
 #include <functional>
 #include <string_view>
-#include <thread>
 #include <tuple>
 
 #include <fmt/format.h>
@@ -19,13 +20,18 @@
 
 namespace fugo::logger::detail {
 
+/// Mimic: std::this_thread::yield()
+FUGO_FORCE_INLINE void yield() noexcept {
+  _mm_pause(); // or std::this_thread::yield();
+}
+
 /// Enqueue policy
 enum class EnqueuePolicy {
-  Drop, ///< Drop on no space in queue
-  Retry ///< Try again
+  Drop, ///< Drop on write into queue failed
+  Retry ///< Spin a bit and try again
 };
 
-struct Queue {
+struct LoggerQueue {
   /// Queue producer
   struct Producer : public BoundedSPSCRawQueue::Producer {
     using BoundedSPSCRawQueue::Producer::Producer;
@@ -44,7 +50,7 @@ struct Queue {
       } else if constexpr (Policy == EnqueuePolicy::Retry) {
         if (buffer.empty()) [[unlikely]] {
           do {
-            std::this_thread::yield();
+            yield();
             buffer = this->prepare(size);
           } while (buffer.empty());
         }

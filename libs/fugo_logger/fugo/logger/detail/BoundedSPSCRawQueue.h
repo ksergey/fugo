@@ -146,7 +146,6 @@ public:
 
   /// Return true on queue closed
   [[nodiscard]] FUGO_FORCE_INLINE auto isClosed() const noexcept {
-    // return std::atomic_ref{header_->closed}.load(std::memory_order_relaxed);
     return std::atomic_ref{header_->closed}.load(std::memory_order_acquire);
   }
 
@@ -351,7 +350,7 @@ template <typename Traits>
 class BoundedSPSCRawQueueImpl;
 
 struct BoundedSPSCRawQueueDefaultTraits {
-  static constexpr std::string_view kTag = "turboq/SPSC";
+  static constexpr std::string_view kTag = "fugo/logger-spsc-queue";
   static constexpr std::size_t kSegmentSize = kHardwareDestructiveInterferenceSize;
   static constexpr std::size_t kAlign = kHardwareDestructiveInterferenceSize;
 };

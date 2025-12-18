@@ -11,7 +11,7 @@
 
 #include <fugo/core/SpinLock.h>
 
-#include "Queue.h"
+#include "LoggerQueue.h"
 
 namespace fugo::logger::detail {
 
@@ -20,20 +20,20 @@ constexpr std::size_t kDefaultCapacityHint = 2 * 1024 * 1024;
 
 /// Queue manager
 /// Used for queues lifetime
-class QueueManager final {
+class LoggerQueueManager final {
 private:
-  std::vector<Queue::Consumer> queues_;
-  std::vector<Queue::Consumer> pendingAddQueues_;
+  std::vector<LoggerQueue::Consumer> queues_;
+  std::vector<LoggerQueue::Consumer> pendingAddQueues_;
   SpinLock pendingAddQueuesLock_;
   std::atomic<bool> rebuildQueuesFlag_{false};
   // Capacity for a new queues
   std::atomic<std::size_t> queueCapacityHint_{kDefaultCapacityHint};
 
 public:
-  QueueManager(QueueManager const&) = delete;
-  QueueManager& operator=(QueueManager const&) = delete;
+  LoggerQueueManager(LoggerQueueManager const&) = delete;
+  LoggerQueueManager& operator=(LoggerQueueManager const&) = delete;
 
-  QueueManager() = default;
+  LoggerQueueManager() = default;
 
   [[nodiscard]] auto queueCapacityHint() const noexcept -> std::size_t {
     return queueCapacityHint_.load(std::memory_order_relaxed);
@@ -49,12 +49,12 @@ public:
   }
 
   /// Create producer with default (or requested) capacity hint
-  [[nodiscard]] auto createProducer(std::optional<std::size_t> capacityHint = {}) noexcept -> Queue::Producer;
+  [[nodiscard]] auto createProducer(std::optional<std::size_t> capacityHint = {}) noexcept -> LoggerQueue::Producer;
 
   /// Iterate over active queues
   /// Non-thread safe
   template <typename Fn>
-    requires std::invocable<Fn, Queue::Consumer*>
+    requires std::invocable<Fn, LoggerQueue::Consumer*>
   void forEachConsumer(Fn&& fn) {
     if (rebuildQueuesFlag_.load(std::memory_order_relaxed)) [[unlikely]] {
       this->rebuildQueues();
@@ -63,7 +63,8 @@ public:
 
     bool atLeastOneQueueClosed{false};
     for (auto& consumer : queues_) {
-      assert(!consumer.isClosed());
+      assert(static_cast<bool>(consumer));
+
       std::invoke(std::forward<Fn>(fn), &consumer);
       atLeastOneQueueClosed = atLeastOneQueueClosed || consumer.isClosed();
     }

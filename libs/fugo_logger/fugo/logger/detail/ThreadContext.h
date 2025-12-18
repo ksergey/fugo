@@ -5,16 +5,18 @@
 
 #include <thread>
 
+#include <fmt/format.h>
+
 #include <fugo/core/Platform.h>
 
-#include "Queue.h"
-#include "QueueManager.h"
+#include "LoggerQueue.h"
+#include "LoggerQueueManager.h"
 
 namespace fugo::logger::detail {
 
 class ThreadContext final {
 private:
-  Queue::Producer producer_;
+  LoggerQueue::Producer producer_;
   std::thread::id threadID_;
 
 public:
@@ -24,8 +26,8 @@ public:
   ThreadContext& operator=(ThreadContext&&) = default;
 
   /// Constructor
-  ThreadContext(QueueManager& queueManager) noexcept
-      : producer_{queueManager.createProducer()}, threadID_{std::this_thread::get_id()} {}
+  ThreadContext(LoggerQueueManager& loggerQueueManager) noexcept
+      : producer_{loggerQueueManager.createProducer()}, threadID_{std::this_thread::get_id()} {}
 
   /// Destructor
   ~ThreadContext() {
@@ -35,7 +37,7 @@ public:
   }
 
   /// Get producer for queue
-  [[nodiscard]] FUGO_FORCE_INLINE auto producer() noexcept -> Queue::Producer& {
+  [[nodiscard]] FUGO_FORCE_INLINE auto producer() noexcept -> LoggerQueue::Producer& {
     return producer_;
   }
 

@@ -127,6 +127,8 @@ FUGO_FORCE_INLINE void logStatement(Args const&... args) {
     // Args...
     (Codec<Args>::encode(dst, args), ...);
   });
+
+  // TODO: create new queue with doubled capacity on failed to enqueue?
 }
 
 /// Transform types into loggable values and pass to log(...)

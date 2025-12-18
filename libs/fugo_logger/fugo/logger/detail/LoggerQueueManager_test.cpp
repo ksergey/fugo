@@ -3,11 +3,11 @@
 
 #include <doctest/doctest.h>
 
-#include "QueueManager.h"
+#include "LoggerQueueManager.h"
 
 namespace fugo::logger::detail {
 
-auto getConsumersCount(QueueManager& qm) noexcept -> std::size_t {
+auto getConsumersCount(LoggerQueueManager& qm) noexcept -> std::size_t {
   std::size_t count = 0;
   qm.forEachConsumer([&]([[maybe_unused]] auto const consumer) {
     count += 1;
@@ -15,8 +15,8 @@ auto getConsumersCount(QueueManager& qm) noexcept -> std::size_t {
   return count;
 }
 
-TEST_CASE("QueueManager") {
-  QueueManager queueManager;
+TEST_CASE("LoggerQueueManager") {
+  LoggerQueueManager queueManager;
 
   REQUIRE_EQ(getConsumersCount(queueManager), 0);
 
@@ -33,7 +33,9 @@ TEST_CASE("QueueManager") {
 
   REQUIRE_EQ(getConsumersCount(queueManager), 2);
 
-  queueManager.forEachConsumer([&](Queue::Consumer* const consumer) {
+  queueManager.forEachConsumer([&](LoggerQueue::Consumer* const consumer) {
+    REQUIRE(consumer);
+    REQUIRE(*consumer);
     consumer->close();
   });
 
