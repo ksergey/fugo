@@ -1,6 +1,6 @@
 set(TargetName fugo_service)
 
-add_library(${TargetName})
+add_library(${TargetName} STATIC)
 target_compile_features(${TargetName}
   PUBLIC cxx_std_23)
 set_target_properties(${TargetName}

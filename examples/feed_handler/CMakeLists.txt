@@ -2,17 +2,17 @@ set(TargetName FeedHandler)
 
 add_executable(${TargetName})
 target_compile_features(${TargetName}
-  PUBLIC cxx_std_23)
+  PRIVATE cxx_std_23)
 set_target_properties(${TargetName}
   PROPERTIES
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF)
 target_compile_options(${TargetName}
-  PUBLIC -Wall -Wextra -Wattributes -Wpedantic -Wstrict-aliasing -Wcast-align -g)
-target_include_directories(${TargetName}
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+  PRIVATE -Wall -Wextra -Wattributes -Wpedantic -Wstrict-aliasing -Wcast-align -g -fno-rtti)
+target_compile_definitions(${TargetName}
+  PRIVATE -DCXXOPTS_NO_RTTI)
 target_link_libraries(${TargetName}
-  PUBLIC cxxopts::cxxopts fmt::fmt fugo::service fugo::logger fugo::config)
+  PRIVATE cxxopts::cxxopts fmt::fmt fugo::service fugo::logger fugo::config)
 
 file(GLOB_RECURSE Headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB_RECURSE Sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
