@@ -3,6 +3,11 @@
 
 #include "Process.h"
 
+#include <cassert>
+#include <thread>
+
+#include <fugo/core/LoopRateLimit.h>
+#include <fugo/core/Signals.h>
 #include <fugo/service/Logger.h>
 
 namespace app {
@@ -16,7 +21,29 @@ Process::~Process() {
 }
 
 void Process::runInLoop() {
-  // TODO: signal handlers
+  fugo::installSignalHandlers();
+
+  auto loopRateLimit = fugo::LoopRateLimit();
+
+  raise(SIGHUP);
+
+  bool running = true;
+  while (running) {
+    // Handle process signals (SIGTERM, SIGINT, SIGHUP)
+    fugo::notifyCatchedSignals([&](fugo::CatchedSignal const& signal) {
+      if (signal.shutdown()) {
+        logDebug("Shutdown request");
+        running = false;
+      }
+      if (signal.reload()) {
+        logDebug("Reload signal catched");
+      }
+    });
+
+    loopRateLimit.sleep();
+  }
+
+  fugo::restoreSignalHandlers();
 }
 
 } // namespace app

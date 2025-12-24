@@ -19,6 +19,8 @@ void StdOutSink::write(std::source_location const& location, LogLevel level, ::t
     switch (level) {
     case LogLevel::Error: return fg(fmt::color::red);
     case LogLevel::Warning: return fg(fmt::color::orange);
+    case LogLevel::Debug: return fg(fmt::color::dim_gray);
+    case LogLevel::Trace: return fg(fmt::color::dim_gray);
     default: break;
     }
     return fmt::text_style();

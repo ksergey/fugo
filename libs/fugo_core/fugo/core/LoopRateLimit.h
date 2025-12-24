@@ -13,6 +13,7 @@
 namespace fugo {
 namespace core {
 
+/// Limit process loop min iteration time
 class LoopRateLimit {
 private:
   std::chrono::nanoseconds minLoopDuration_;
@@ -32,7 +33,7 @@ public:
     }
   }
 
-  void reset() noexcept {
+  FUGO_FORCE_INLINE void reset() noexcept {
     deadline_ = 0;
   }
 
