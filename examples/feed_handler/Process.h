@@ -3,11 +3,25 @@
 
 #pragma once
 
+#include <fugo/service/BroadcastQueue.h>
+#include <fugo/service/CommandQueue.h>
 #include <fugo/service/Environment.h>
 
 #include "Config.h"
 
 namespace app {
+
+template <typename Features>
+struct LocalBroadcastSender {};
+
+template <typename Features>
+struct LocalBroadcastReceiver {};
+
+template <typename Features>
+struct LocalCommandSender {};
+
+template <typename Features>
+struct LocalCommandReceiver {};
 
 using fugo::service::Environment;
 
