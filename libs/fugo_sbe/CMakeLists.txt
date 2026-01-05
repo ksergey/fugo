@@ -1,26 +1,27 @@
-set(TargetName FeedHandler)
+set(TargetName fugo_sbe)
 
-sbe_make_codec(FeedHandler-messaging
-  PACKAGE sbe_local
-  SCHEMA ${CMAKE_CURRENT_SOURCE_DIR}/messaging.xml
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messaging
-)
-
-add_executable(${TargetName})
+add_library(${TargetName} STATIC)
 target_compile_features(${TargetName}
-  PRIVATE cxx_std_23)
+  PUBLIC cxx_std_23)
 set_target_properties(${TargetName}
   PROPERTIES
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF)
 target_compile_options(${TargetName}
   PRIVATE -Wall -Wextra -Wattributes -Wpedantic -Wstrict-aliasing -Wcast-align -g -fno-rtti)
-target_compile_definitions(${TargetName}
-  PRIVATE -DCXXOPTS_NO_RTTI)
+target_include_directories(${TargetName}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PRIVATE cxxopts::cxxopts fmt::fmt fugo::service fugo::logger fugo::config)
-target_link_libraries(${TargetName}
-  PRIVATE FeedHandler-messaging)
+  PUBLIC fugo::core)
+
+add_library(fugo::sbe ALIAS ${TargetName})
+
+if (FUGO_SANITIZER)
+  target_compile_options(${TargetName}
+    PUBLIC -fsanitize=address,leak,undefined)
+  target_link_options(${TargetName}
+    PUBLIC -fsanitize=address,leak,undefined)
+endif()
 
 file(GLOB_RECURSE Headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB_RECURSE Sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
@@ -28,17 +29,15 @@ file(GLOB_RECURSE Sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 FugoAddTestsFromSourceList(Sources
   PREFIX ${TargetName}
   COMPILE_OPTIONS -Wall -Wextra -g
-  LIBS doctest::doctest_with_main)
+  LIBS doctest::doctest_with_main ${TargetName})
 
 FugoAddBenchmarksFromSourceList(Sources
   PREFIX ${TargetName}
   COMPILE_OPTIONS -Wall -Wextra -g
-  LIBS benchmark::benchmark_main)
+  LIBS benchmark::benchmark_main ${TargetName})
 
 FugoExcludeTestsAndBenchmarksFromSourceList(Sources)
 
 target_sources(${TargetName} PUBLIC ${Headers})
 target_sources(${TargetName} PRIVATE ${Sources})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config.json
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

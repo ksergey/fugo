@@ -10,7 +10,14 @@
 #include <fugo/core/Signals.h>
 #include <fugo/service/Logger.h>
 
+#include <fugo/sbe/Concepts.h>
+
+#include "sbe_local/AdminHeartbeat1.h"
+
 namespace app {
+
+static_assert(fugo::sbe::SBEMessage<sbe_local::AdminHeartbeat1>);
+
 namespace {
 
 constexpr auto kMaxCommandLengthHint = std::size_t(100); // TODO:
@@ -56,6 +63,8 @@ void Process::runInLoop() {
         logDebug("Reload signal catched");
       }
     });
+
+    sender_.send<sbe_local::AdminHeartbeat1>([]([[maybe_unused]] auto body) {});
 
     loopRateLimit.sleep();
   }
