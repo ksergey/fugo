@@ -7,13 +7,15 @@
 #include <functional>
 
 #include <fugo/sbe/Concepts.h>
+#include <fugo/sbe/Prepare.h>
 
 namespace fugo::service {
 
 struct SBEReceiver {
-  // TODO: check ListT contains sbe messages with the same MessageHeader
   template <typename ListT, typename Fn>
   auto receive(this auto& impl, Fn&& fn) -> bool {
+    using MessageHeader = fugo::sbe::SBEMessageHeader<ListT>;
+
     bool receivedAtLeastOne = false;
     while (true) {
       auto const buffer = impl.fetch();
@@ -21,7 +23,10 @@ struct SBEReceiver {
         break;
       }
       receivedAtLeastOne = true;
-      // TODO: decode and invoke
+
+      auto const messageHeader =
+          MessageHeader{const_cast<char*>(std::bit_cast<char const*>(buffer.data())), buffer.size()};
+      fugo::sbe::sbeVisit<ListT>(messageHeader, std::forward<Fn>(fn));
       impl.consume();
     }
     return receivedAtLeastOne;

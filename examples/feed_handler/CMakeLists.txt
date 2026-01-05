@@ -37,8 +37,27 @@ FugoAddBenchmarksFromSourceList(Sources
 
 FugoExcludeTestsAndBenchmarksFromSourceList(Sources)
 
+FugoRemoveMatchesFromList(Sources MATCHES dump.cpp)
+
 target_sources(${TargetName} PUBLIC ${Headers})
 target_sources(${TargetName} PRIVATE ${Sources})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config.json
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+set(TargetName dump)
+add_executable(${TargetName} dump.cpp)
+target_compile_features(${TargetName}
+  PRIVATE cxx_std_23)
+set_target_properties(${TargetName}
+  PROPERTIES
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF)
+target_compile_options(${TargetName}
+  PRIVATE -Wall -Wextra -Wattributes -Wpedantic -Wstrict-aliasing -Wcast-align -g -fno-rtti)
+target_compile_definitions(${TargetName}
+  PRIVATE -DCXXOPTS_NO_RTTI)
+target_link_libraries(${TargetName}
+  PRIVATE cxxopts::cxxopts fmt::fmt fugo::service)
+target_link_libraries(${TargetName}
+  PRIVATE FeedHandler-messaging)
