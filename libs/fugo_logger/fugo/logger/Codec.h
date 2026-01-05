@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 
@@ -74,7 +76,7 @@ struct Codec<std::string_view> {
 
   static auto decode(std::byte const*& src) noexcept -> std::string_view {
     auto const size = SizeCodec::decode(src);
-    auto value = std::string_view(std::bit_cast<char const*>(src), size);
+    auto value = std::string_view{std::bit_cast<char const*>(src), size};
     src += size;
     return value;
   }

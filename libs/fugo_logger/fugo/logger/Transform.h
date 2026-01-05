@@ -4,6 +4,7 @@
 #pragma once
 
 #include <ctime>
+#include <filesystem>
 #include <string>
 #include <type_traits>
 
@@ -63,6 +64,14 @@ template <typename T>
 struct Transform<T> {
   [[nodiscard]] constexpr auto operator()(T const& value) const noexcept -> std::string_view {
     return value;
+  }
+};
+
+/// std::filesystem::path
+template <>
+struct Transform<std::filesystem::path> {
+  [[nodiscard]] constexpr auto operator()(std::filesystem::path const& value) -> std::string_view {
+    return value.native();
   }
 };
 

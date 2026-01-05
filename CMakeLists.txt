@@ -25,7 +25,7 @@ if (NOT TARGET turboq::turboq)
   add_subdirectory(deps/turboq)
 endif()
 
-add_subdirectory(deps/sbe-code-gen)
+add_subdirectory(deps/simple-binary-encoding)
 
 enable_testing()
 

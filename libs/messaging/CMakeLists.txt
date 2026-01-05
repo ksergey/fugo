@@ -3,7 +3,6 @@ set(TargetName messaging)
 sbe_make_codec(sbe
   SCHEMA ${CMAKE_CURRENT_SOURCE_DIR}/messaging.xml
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/sbe
-  GENERATOR cppng
 )
 
 add_library(${TargetName})
@@ -18,7 +17,7 @@ target_compile_options(${TargetName}
 target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PUBLIC fugo::core sbe)
+  PUBLIC sbe)
 
 file(GLOB_RECURSE Headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB_RECURSE Sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
