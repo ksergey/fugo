@@ -6,6 +6,7 @@
 #include <fugo/service/BasicCommandReceiver.h>
 #include <fugo/service/BasicDataSender.h>
 #include <fugo/service/Environment.h>
+#include <fugo/service/Logger.h>
 #include <fugo/service/ReceiverFeatures.h>
 #include <fugo/service/SenderFeatures.h>
 
@@ -17,6 +18,11 @@ using fugo::service::Environment;
 
 struct DataSender : public fugo::service::BasicDataSender, public fugo::service::SBESender {
   using fugo::service::BasicDataSender::BasicDataSender;
+
+  template <typename BodyT>
+  void beforeMessageSend(BodyT body) noexcept {
+    // logDebug("Sending: {}", body);
+  }
 };
 
 struct CommandReceiver : public fugo::service::BasicCommandReceiver, public fugo::service::SBEReceiver {

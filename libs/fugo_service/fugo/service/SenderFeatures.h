@@ -7,36 +7,48 @@
 #include <functional>
 
 #include <fugo/sbe/Concepts.h>
-#include <fugo/sbe/Prepare.h>
+#include <fugo/sbe/Utils.h>
 
 namespace fugo::service {
 
-struct SBESender {
+class SBESender {
+public:
   template <typename MessageT, typename Fn>
     requires fugo::sbe::ConstLengthSBEMessage<MessageT>
   auto send(this auto& impl, Fn&& fn) -> bool {
     constexpr auto encodedMessageSize = fugo::sbe::computeLength<MessageT>();
-    auto buffer = impl.prepare(encodedMessageSize);
-    if (buffer.empty()) {
-      return false;
-    }
-    std::invoke(
-        std::forward<Fn>(fn), MessageT{}.wrapAndApplyHeader(std::bit_cast<char*>(buffer.data()), 0, buffer.size()));
-    impl.commit();
-    return true;
+    return impl.template sendImpl<MessageT>(encodedMessageSize, std::forward<Fn>(fn));
   }
 
   template <typename MessageT, typename Fn>
     requires fugo::sbe::NonConstLengthSBEMessage<MessageT>
   auto send(this auto& impl, std::size_t groupsCount, Fn&& fn) -> bool {
     auto const encodedMessageSize = fugo::sbe::computeLength<MessageT>(groupsCount);
+    return impl.template sendImpl<MessageT>(encodedMessageSize, std::forward<Fn>(fn));
+  }
+
+private:
+  template <typename MessageT, typename Fn>
+  auto sendImpl(this auto& impl, std::size_t encodedMessageSize, Fn&& fn) -> bool {
     auto buffer = impl.prepare(encodedMessageSize);
     if (buffer.empty()) {
       return false;
     }
-    std::invoke(
-        std::forward<Fn>(fn), MessageT{}.wrapAndApplyHeader(std::bit_cast<char*>(buffer.data()), 0, buffer.size()));
+
+    // Fill SBE message header and obtain message body
+    auto messageBody = MessageT{}.wrapAndApplyHeader(std::bit_cast<char*>(buffer.data()), 0, buffer.size());
+
+    // Fill message body
+    std::invoke(std::forward<Fn>(fn), messageBody);
+
+    // Call beforeSend on available
+    if constexpr (requires { impl.beforeMessageSend(messageBody); }) {
+      impl.beforeMessageSend(messageBody);
+    }
+
+    // Commit message
     impl.commit();
+
     return true;
   }
 };

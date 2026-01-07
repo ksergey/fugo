@@ -7,7 +7,7 @@
 #include <functional>
 
 #include <fugo/sbe/Concepts.h>
-#include <fugo/sbe/Prepare.h>
+#include <fugo/sbe/Utils.h>
 
 namespace fugo::service {
 

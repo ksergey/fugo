@@ -78,7 +78,7 @@ struct SBEVisitImpl<List<Ts...>> {
 
 template <typename ListT, typename MessageHeaderT, typename Fn>
 constexpr void sbeVisit(MessageHeaderT sbeMessageHeader, Fn&& fn) {
-  return detail::SBEVisitImpl<ListT>::template invoke(sbeMessageHeader, std::forward<Fn>(fn));
+  return detail::SBEVisitImpl<ListT>::invoke(sbeMessageHeader, std::forward<Fn>(fn));
 }
 
 } // namespace fugo::sbe

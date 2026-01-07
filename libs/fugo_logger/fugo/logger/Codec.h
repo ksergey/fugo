@@ -12,6 +12,7 @@
 #include <type_traits>
 
 #include <fugo/core/TypeTraits.h>
+#include <fugo/sbe/Concepts.h>
 
 namespace fugo::logger {
 
@@ -81,5 +82,31 @@ struct Codec<std::string_view> {
     return value;
   }
 };
+
+#if 0
+template <typename T>
+  requires fugo::sbe::SBEMessage<T>
+struct Codec<T> {
+  using SizeCodec = Codec<std::uint32_t>;
+
+  static constexpr auto encodedSize(T value) noexcept -> std::size_t {
+    return SizeCodec::encodedSize() + value.bufferLength() - value.offset();
+  }
+
+  static void encode(std::byte*& dest, T value) noexcept {
+    auto const messageSize = value.bufferLength() - value.offset();
+    SizeCodec::encode(dest, messageSize);
+    std::memcpy(dest, value.buffer() + value.offset(), messageSize);
+    dest += messageSize;
+  }
+
+  static auto decode(std::byte const*& src) noexcept -> T {
+    auto const messageSize = SizeCodec::decode(src);
+    auto value = T{std::bit_cast<char*>(src), messageSize};
+    src += messageSize;
+    return value;
+  }
+};
+#endif
 
 } // namespace fugo::logger
