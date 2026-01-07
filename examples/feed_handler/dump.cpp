@@ -8,8 +8,8 @@
 #include <fmt/ostream.h>
 
 #include <fugo/core/LoopRateLimit.h>
-#include <fugo/service/DataQueue.h>
 #include <fugo/service/Environment.h>
+#include <fugo/service/Receiver.h>
 #include <fugo/service/ReceiverFeatures.h>
 
 #include "sbe_local/AdminHeartbeat1.h"

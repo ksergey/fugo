@@ -4,10 +4,27 @@
 #pragma once
 
 #include <turboq/BoundedMPSCRawQueue.h>
+#include <turboq/BoundedSPMCRawQueue.h>
 
 #include "Environment.h"
 
 namespace fugo::service {
+
+/// @see turboq::BoundedSPMCRawQueue::CreationOptions;
+using DataQueueCreationOptions = turboq::BoundedSPMCRawQueue::CreationOptions;
+
+struct DataQueueSender : public turboq::BoundedSPMCRawQueue::Producer {
+  DataQueueSender() = default;
+
+  DataQueueSender(std::string_view name, Environment const& env)
+      : turboq::BoundedSPMCRawQueue::Producer{
+            turboq::BoundedSPMCRawQueue{std::string{name}.append("@data"), env.memorySource()}.createProducer()} {}
+
+  DataQueueSender(std::string_view name, DataQueueCreationOptions const& options, Environment const& env)
+      : turboq::BoundedSPMCRawQueue::Producer{
+            turboq::BoundedSPMCRawQueue{std::string{name}.append("@data"), options, env.memorySource()}
+                .createProducer()} {}
+};
 
 /// @see turboq::BoundedMPSCRawQueue::CreationOptions;
 using CommandQueueCreationOptions = turboq::BoundedMPSCRawQueue::CreationOptions;
@@ -23,17 +40,6 @@ struct CommandQueueSender : public turboq::BoundedMPSCRawQueue::Producer {
       : turboq::BoundedMPSCRawQueue::Producer{
             turboq::BoundedMPSCRawQueue{std::string{name}.append("@command"), options, env.memorySource()}
                 .createProducer()} {}
-};
-
-struct CommandQueueReceiver : public turboq::BoundedMPSCRawQueue::Consumer {
-  CommandQueueReceiver(std::string_view name, Environment const& env)
-      : turboq::BoundedMPSCRawQueue::Consumer{
-            turboq::BoundedMPSCRawQueue{std::string{name}.append("@command"), env.memorySource()}.createConsumer()} {}
-
-  CommandQueueReceiver(std::string_view name, CommandQueueCreationOptions const& options, Environment const& env)
-      : turboq::BoundedMPSCRawQueue::Consumer{
-            turboq::BoundedMPSCRawQueue{std::string{name}.append("@command"), options, env.memorySource()}
-                .createConsumer()} {}
 };
 
 } // namespace fugo::service

@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include <fugo/service/CommandQueue.h>
-#include <fugo/service/DataQueue.h>
 #include <fugo/service/Environment.h>
+#include <fugo/service/Receiver.h>
+#include <fugo/service/ReceiverFeatures.h>
+#include <fugo/service/Sender.h>
 #include <fugo/service/SenderFeatures.h>
 
 #include "Config.h"
@@ -13,12 +14,15 @@
 namespace app {
 
 using fugo::service::CommandQueueCreationOptions;
-using fugo::service::CommandQueueReceiver;
 using fugo::service::DataQueueCreationOptions;
 using fugo::service::Environment;
 
-struct DataQueueSender : public fugo::service::DataQueueSender, fugo::service::SBESender {
+struct Sender : public fugo::service::DataQueueSender, public fugo::service::SBESender {
   using fugo::service::DataQueueSender::DataQueueSender;
+};
+
+struct Receiver : public fugo::service::CommandQueueReceiver, public fugo::service::SBEReceiver {
+  using fugo::service::CommandQueueReceiver::CommandQueueReceiver;
 };
 
 class Process {
@@ -26,8 +30,8 @@ private:
   Config const& config_;
   Environment const& env_;
 
-  CommandQueueReceiver receiver_;
-  DataQueueSender sender_;
+  Receiver receiver_;
+  Sender sender_;
 
 public:
   Process(Process const&) = delete;
