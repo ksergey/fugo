@@ -20,16 +20,15 @@ static_assert(fugo::sbe::SBEMessage<sbe_local::AdminHeartbeat1>);
 
 namespace {
 
-constexpr auto kMaxCommandLengthHint = std::size_t(100); // TODO:
+constexpr auto kMaxCommandMessageSizeHint = std::size_t(100); // TODO:
 
 } // namespace
 
 Process::Process(Config const& config, Environment const& env)
     : config_{config}, env_{env},
-      receiver_{config_.service.instanceName,
-          CommandQueueCreationOptions{kMaxCommandLengthHint, config_.service.commandQueueLengthHint}, env_},
-      sender_{
-          config_.service.instanceName, DataQueueCreationOptions{config_.service.dataQueueSizeHint * (1 << 20)}, env_} {
+      dataSender_{config_.service.instanceName, {config_.service.dataQueueSizeHint * (1 << 20)}, env_},
+      commandReceiver_{
+          config_.service.instanceName, {kMaxCommandMessageSizeHint, config_.service.commandQueueLengthHint}, env_} {
 
   logNotice("Environment");
   logNotice("  instanceName = \"{}\"/\"{}\"", env_.instanceName(), config_.service.instanceName);
@@ -64,7 +63,7 @@ void Process::runInLoop() {
       }
     });
 
-    sender_.send<sbe_local::AdminHeartbeat1>([]([[maybe_unused]] auto body) {});
+    dataSender_.send<sbe_local::AdminHeartbeat1>([]([[maybe_unused]] auto body) {});
 
     loopRateLimit.sleep();
   }
