@@ -18,9 +18,12 @@ target_compile_options(${TargetName}
 target_compile_definitions(${TargetName}
   PRIVATE -DCXXOPTS_NO_RTTI)
 target_link_libraries(${TargetName}
-  PRIVATE cxxopts::cxxopts fmt::fmt fugo::service fugo::logger fugo::config)
+  PRIVATE cxxopts::cxxopts fmt::fmt-header-only fugo::service fugo::logger fugo::config)
 target_link_libraries(${TargetName}
   PRIVATE FeedHandler-messaging)
+
+target_link_libraries(${TargetName}
+  PRIVATE CURL::libcurl)
 
 file(GLOB_RECURSE Headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB_RECURSE Sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
@@ -58,6 +61,6 @@ target_compile_options(${TargetName}
 target_compile_definitions(${TargetName}
   PRIVATE -DCXXOPTS_NO_RTTI)
 target_link_libraries(${TargetName}
-  PRIVATE cxxopts::cxxopts fmt::fmt fugo::service)
+  PRIVATE cxxopts::cxxopts fmt::fmt-header-only fugo::service)
 target_link_libraries(${TargetName}
   PRIVATE FeedHandler-messaging)

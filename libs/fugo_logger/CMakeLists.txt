@@ -14,7 +14,7 @@ target_compile_options(${TargetName}
 target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PUBLIC fugo::core fugo::sbe fmt::fmt)
+  PUBLIC fugo::core fugo::sbe fmt::fmt-header-only)
 
 if (FUGO_LOGGER_TSC_CLOCK)
   target_compile_definitions(${TargetName}

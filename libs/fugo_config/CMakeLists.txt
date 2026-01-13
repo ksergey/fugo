@@ -12,7 +12,7 @@ target_compile_options(${TargetName}
 target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PUBLIC fugo::core fmt::fmt nlohmann_json::nlohmann_json)
+  PUBLIC fugo::core fmt::fmt-header-only nlohmann_json::nlohmann_json)
 
 add_library(fugo::config ALIAS ${TargetName})
 

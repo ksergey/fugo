@@ -12,7 +12,7 @@ target_compile_options(${TargetName}
 target_include_directories(${TargetName}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${TargetName}
-  PUBLIC turboq::turboq fmt::fmt)
+  PUBLIC turboq::turboq fmt::fmt-header-only)
 
 add_library(fugo::core ALIAS ${TargetName})
 
