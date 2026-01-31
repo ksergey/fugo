@@ -1,12 +1,155 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <messageSchema xmlns="http://fixprotocol.io/2016/sbe" package="fugo" id="1" version="0" semanticVersion="FIX5SP2" description="20260105" byteOrder="littleEndian">
-    <types>
-        <composite name="messageHeader" description="Template ID and length of message root">
-            <type name="blockLength" primitiveType="uint16"/>
-            <type name="templateId" primitiveType="uint16"/>
-            <type name="schemaId" primitiveType="uint16"/>
-            <type name="version" primitiveType="uint16"/>
-        </composite>
-    </types>
-    <message name="AdminHeartbeat1" id="1" description="AdminHeartbeat" semanticType="0"/>
+  <types>
+		<!-- Mandatory definitions -->
+    <composite name="messageHeader" description="Template ID and length of message root">
+      <type name="blockLength" primitiveType="uint16"/>
+      <type name="templateId" primitiveType="uint16"/>
+      <type name="schemaId" primitiveType="uint16"/>
+      <type name="version" primitiveType="uint16"/>
+    </composite>
+		<composite name="GroupSizeEncoding" description="Repeating group dimensions">
+			<type name="blockLength" primitiveType="uint16" description="Root block length" />
+			<type name="numInGroup" primitiveType="uint8" semanticType="NumInGroup" description="A counter representing the number of entries in a repeating group." />
+    </composite>
+
+		<!-- Common definitions -->
+		<enum name="TimeUnit" encodingType="uint8" semanticType="Int" description="Unit of time">
+			<validValue name="SECOND">0</validValue>
+			<validValue name="MILLISECOND">3</validValue>
+			<validValue name="MICROSECOND">6</validValue>
+			<validValue name="NANOSECOND">9</validValue>
+		</enum>
+
+    <!-- FIX Message Types -->
+		<enum name="MessageType" encodingType="char" semanticType="char" description="FIX Message Type">
+			<validValue name="Sequence" description="Sequence message for heartbeat">0</validValue>
+			<validValue name="MarketDataIncrementalRefresh" description="Market Data Incremental Refresh">X</validValue>
+			<validValue name="SecurityStatus" description="Security Status">f</validValue>
+			<validValue name="SecurityDefinition" description="Security Definition">d</validValue>
+			<validValue name="MarketDataSnapshotFullRefresh" description="Market Data Full Refresh">W</validValue>
+		</enum>
+
+		<!-- Common types -->
+		<composite name="Price" semanticType="Price" description="Price (4 decimal places). Usually 3 places are enough, but FX requires 4">
+			<type name="mantissa" primitiveType="int64" description="Mantissa (for fixed-point decimal numbers)" />
+			<type name="exponent" primitiveType="int8" presence="constant" description="Exponent (for fixed-point decimal numbers)">-4</type>
+		</composite>
+		<composite name="PriceOptional" semanticType="Price" description="Optional Price (4 decimal places). Usually 3 places are enough, but FX requires 4">
+			<type name="mantissa" primitiveType="int64" presence="optional" description="Mantissa (for fixed-point decimal numbers)" />
+			<type name="exponent" primitiveType="int8" presence="constant" description="Exponent (for fixed-point decimal numbers)">-4</type>
+		</composite>
+		<type name="Quantity" primitiveType="uint32" semanticType="Qty" description="Quantity in order/trade" />
+		<type name="QuantityOptional" primitiveType="uint32" presence="optional" nullValue="0" semanticType="Qty" description="Optional Quantity in order/trade, null value = 0" />
+		<composite name="UTCTimestampNanos" description="UTC timestamp with nanosecond precision (Unix Epoch)" semanticType="UTCTimestamp">
+			<type name="time" primitiveType="uint64" presence="optional" nullValue="0" description="UTC timestamp with nanosecond precision (Unix Epoch)" />
+			<type name="unit" primitiveType="uint8" presence="constant" description="time unit (nanoseconds)" valueRef="TimeUnit.NANOSECOND" />
+		</composite>
+		<type name="LocalMktDate" primitiveType="uint16" semanticType="LocalMktDate" presence="optional" nullValue="0" description="Local date (as opposed to UTC). Number of days since UNIX Epoch (January 1st, 1970). Example: 18319 represents February 27, 2020." />
+		<type name="SecurityID" primitiveType="uint64" semanticType="Int" presence="optional" nullValue="0" description="Security ID as defined by B3's Trading System" />
+		<type name="Symbol" primitiveType="char" length="20" characterEncoding="ASCII" semanticType="String" description="Ticker symbol" />
+		<enum name="Side" encodingType="uint8" semanticType="Int" description="Side of order">
+			<validValue name="BUY">1</validValue>
+			<validValue name="SELL">2</validValue>
+		</enum>
+		<enum name="AggressorSide" encodingType="uint8" semanticType="Int" description="Which side is aggressor of this trade.">
+			<validValue name="NO_AGGRESSOR" description="Trade has no aggressor">0</validValue>
+			<validValue name="BUY" description="Buy">1</validValue>
+			<validValue name="SELL" description="Sell">2</validValue>
+		</enum>
+		<enum name="MDUpdateAction" encodingType="uint8" semanticType="Int" description="Types of Market Data update action.">
+			<validValue name="NEW" description="New">0</validValue>
+			<validValue name="CHANGE" description="Change">1</validValue>
+			<validValue name="DELETE" description="Delete">2</validValue>
+			<validValue name="DELETE_THRU" description="Delete Thru - only for MBO">3</validValue>
+			<validValue name="DELETE_FROM" description="Delete From - only for MBO">4</validValue>
+			<validValue name="OVERLAY" description="Overlay - not used">5</validValue>
+		</enum>
+		<enum name="MDEntryType" encodingType="char" semanticType="Char" description="Type of the Market Data Entry.">
+			<validValue name="BID" description="Bid">0</validValue>
+			<validValue name="OFFER" description="Offer">1</validValue>
+			<validValue name="TRADE" description="Trade or Trade Summary or Last Trade Price">2</validValue>
+			<validValue name="INDEX_VALUE" description="Index Value">3</validValue>
+			<validValue name="OPENING_PRICE" description="Opening Price">4</validValue>
+			<validValue name="CLOSING_PRICE" description="Closing Price">5</validValue>
+			<validValue name="SETTLEMENT_PRICE" description="Settlement Price">6</validValue>
+			<validValue name="SESSION_HIGH_PRICE" description="Session High Price">7</validValue>
+			<validValue name="SESSION_LOW_PRICE" description="Session Low Price">8</validValue>
+			<validValue name="SESSION_VWAP_PRICE" description="Session VWAP Price">9</validValue>
+			<validValue name="IMBALANCE" description="Imbalance">A</validValue>
+			<validValue name="TRADE_VOLUME" description="Trade Volume">B</validValue>
+			<validValue name="OPEN_INTEREST" description="Open Interest">C</validValue>
+			<validValue name="EMPTY_BOOK" description="Empty Book">J</validValue>
+			<validValue name="SECURITY_TRADING_STATE_PHASE" description="Security Trading State / Phase">c</validValue>
+			<validValue name="PRICE_BAND" description="Price band">g</validValue>
+			<validValue name="QUANTITY_BAND" description="Quantity band">h</validValue>
+			<validValue name="COMPOSITE_UNDERLYING_PRICE" description="Composite Underlying Price">D</validValue>
+			<validValue name="VOLATILITY_PRICE" description="Volatility price">v</validValue>
+		</enum>
+		<set name="MatchEventIndicator" encodingType="uint8" description="Set of indicators for the end of updates for a given event. It also indicates if this message is a retransmission.">
+			<choice name="RecoveryMsg" description="1=Message is sent during recovery process (QuoteCondition=R), 0=Not">0</choice>
+		</set>
+	</types>
+
+	<!-- Sequence -->
+	<sbe:message name="Sequence_2" id="2" description="Sent in incremental, snapshot and instrument list feeds in periods of no activity." semanticType="0">
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.Sequence" />
+	</sbe:message>
+
+	<sbe:message name="IncrementalRefresh_EmptyBook_9" id="9" description="Market Data Incremental Refresh - Empty Book">
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.MarketDataIncrementalRefresh" />
+		<field name="mDEntryType" id="269" type="MDEntryType" presence="constant" valueRef="MDEntryType.EMPTY_BOOK" />
+		<field name="securityID" id="48" type="SecurityID" presence="optional" description="Security ID as defined by B3. For the SecurityID list, see the Security Definition message in Market Data feed." />
+		<field name="matchEventIndicator" id="37035" type="MatchEventIndicator" description="Identifies the end of the current event and if it is a retransmission" />
+	</sbe:message>
+
+	<sbe:message name="IncrementalRefresh_Order_MBO_50" id="50" description="Disseminates the creation or modification of a new order.">
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.MarketDataIncrementalRefresh" />
+		<field name="securityID" id="48" type="SecurityID" description="Security ID as defined by B3. For the SecurityID list, see the Security Definition message in Market Data feed." />
+		<field name="mDEntryTimestamp" id="37033" type="UTCTimestampNanos" description="Date and Time of Market Data Entry" />
+		<field name="mDInsertTimestamp" id="37034" type="UTCTimestampNanos" presence="optional" description="The date and time when the order was inserted or re-inserted into the order book or manually altered by MktOps." />
+		<field name="orderID" id="37" type="uint64" description="Unique identifier for Order as assigned by the exchange. It is unique per broker firm, per instrument, per trading date." />
+		<field name="mDEntrySize" id="271" type="Quantity" description="Displayed quantity or volume represented by the Market Data Entry" />
+		<field name="mDEntryPx" id="270" type="PriceOptional" presence="optional" description="Price per share or contract. Conditionally required if the order type requires a price (not market orders and RLP)" />
+		<field name="mDEntryType" id="269" type="MDEntryType" description="Entry Type (BID or OFFER)" />
+		<field name="mDUpdateAction" id="279" type="MDUpdateAction" description="Update Action (NEW, CHANGE)" />
+		<field name="matchEventIndicator" id="37035" type="MatchEventIndicator" description="Identifies if it is a retransmission" />
+	</sbe:message>
+
+	<sbe:message name="IncrementalRefresh_DeleteOrder_MBO_51" id="51" description="Disseminates the deletion of a new order." >
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.MarketDataIncrementalRefresh" />
+		<field name="securityID" id="48" type="SecurityID" description="Security ID as defined by B3. For the SecurityID list, see the Security Definition message in Market Data feed." />
+		<field name="mDEntryTimestamp" id="37033" type="UTCTimestampNanos" description="Date and Time of Market Data Entry" />
+		<field name="orderID" id="37" type="uint64" description="Unique identifier for Order as assigned by the exchange. It is unique per broker firm, per instrument, per trading date." />
+		<field name="mDEntryType" id="269" type="MDEntryType" description="Entry Type (BID or OFFER)" />
+		<field name="mDUpdateAction" id="279" type="MDUpdateAction" description="Update Action (DELETE, DELETE_FROM, DELETE_THRU)" />
+		<field name="matchEventIndicator" id="37035" type="MatchEventIndicator" description="Identifies if it is a retransmission" />
+	</sbe:message>
+
+	<sbe:message name="IncrementalRefresh_Trade_MBO_53" id="53" description="Relays trade information on one instrument">
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.MarketDataIncrementalRefresh" />
+		<field name="mDEntryType" id="269" type="MDEntryType" presence="constant" valueRef="MDEntryType.TRADE" description="Entry type: Trade" />
+		<field name="securityID" id="48" type="SecurityID" description="Security ID as defined by B3. For the SecurityID list, see the Security Definition message in Market Data feed." />
+		<field name="mDEntryTimestamp" id="37033" type="UTCTimestampNanos" description="Date and Time of Market Data Entry" />
+		<field name="mDInsertTimestamp" id="37034" type="UTCTimestampNanos" description="The date and time when the order was inserted or re-inserted into the order book or manually altered by MktOps." />
+		<field name="mDEntryPx" id="270" type="PriceOptional" presence="optional" description="Price of the Market Data Entry." />
+		<field name="mDEntrySize" id="271" type="Quantity" description="Quantity or volume represented by the Market Data Entry" />
+		<field name="tradeID" id="1003" type="uint32" description="Contains the unique identifier for this trade per instrument + trading date, as assigned by the exchange. Required if reporting a Trade." />
+		<field name="mDUpdateAction" id="279" type="MDUpdateAction" description="Update Action (NEW or DELETE)" />
+		<field name="matchEventIndicator" id="37035" type="MatchEventIndicator" description="Identifies the end of the current event" />
+		<field name="tradeDate" id="75" type="LocalMktDate" presence="optional" description="Used to specify the trading date for which a set of market data applies. If absent, use the current day (expressed in local time at place of trade)" />
+	</sbe:message>
+
+	<sbe:message name="SnapshotFullRefresh_Orders_MBO_71" id="71" description="Partial list of orders for the snapshot of a single instrument.">
+		<field name="messageType" id="35" type="MessageType" presence="constant" valueRef="MessageType.MarketDataSnapshotFullRefresh" />
+		<field name="securityID" id="48" type="SecurityID" description="Security ID as defined by B3. For the SecurityID list, see the Security Definition message in Market Data feed." />
+		<group name="noMDEntries" id="268" dimensionType="GroupSizeEncoding" description="Partial list of orders" blockLength="48">
+			<field name="mDEntryTimestamp" id="37033" type="UTCTimestampNanos" description="Date and Time of Market Data Entry" />
+			<field name="mDInsertTimestamp" id="37034" type="UTCTimestampNanos" presence="optional" description="The date and time when the order was inserted or re-inserted into the order book or manually altered by MktOps." />
+			<field name="orderID" id="37" type="uint64" description="Unique identifier for Order as assigned by the exchange. It is unique per broker firm, per instrument, per trading date." />
+			<field name="mDEntryPx" id="270" type="PriceOptional" presence="optional" description="Price per share or contract. Conditionally required if the order type requires a price (not market orders and RLP)" />
+			<field name="mDEntrySize" id="271" type="Quantity" description="Displayed quantity or volume represented by the Market Data Entry" />
+			<field name="mDEntryType" id="269" type="MDEntryType" description="Entry Type (BID or OFFER)" />
+		</group>
+	</sbe:message>
 </messageSchema>

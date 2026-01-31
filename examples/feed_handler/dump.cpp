@@ -12,7 +12,7 @@
 #include <fugo/service/Environment.h>
 #include <fugo/service/ReceiverFeatures.h>
 
-#include "sbe_local/AdminHeartbeat1.h"
+#include "sbe_local/Sequence_2.h"
 
 struct DataReceiver : public fugo::service::BasicDataReceiver, fugo::service::SBEReceiver {
   using fugo::service::BasicDataReceiver::BasicDataReceiver;
@@ -50,7 +50,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     auto dataReceiver = DataReceiver{instanceName, env};
 
-    using Messages = MessageList<sbe_local::AdminHeartbeat1>;
+    using Messages = MessageList<sbe_local::Sequence_2>;
 
     while (true) {
       dataReceiver.receive<Messages>([](auto sbeBody) {

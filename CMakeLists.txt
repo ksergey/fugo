@@ -6,6 +6,9 @@ option(FUGO_SANITIZER "Build with sanitizer" OFF)
 
 include(cmake/FugoUtils.cmake)
 
+# Override FindOpenSSL
+add_subdirectory(deps/openssl)
+
 if (NOT TARGET doctest::doctest_with_main)
   add_subdirectory(deps/doctest)
 endif()
@@ -24,9 +27,8 @@ endif()
 if (NOT TARGET CURL::libcurl)
   add_subdirectory(deps/curl)
 endif()
-if (NOT TARGET turboq::turboq)
-  add_subdirectory(deps/turboq)
-endif()
+
+add_subdirectory(deps/turboq)
 
 add_subdirectory(deps/simple-binary-encoding)
 
