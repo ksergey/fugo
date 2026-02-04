@@ -3,4 +3,5 @@ add_subdirectory(fugo_sbe)
 add_subdirectory(fugo_logger)
 add_subdirectory(fugo_config)
 add_subdirectory(fugo_service)
-add_subdirectory(messaging)
+
+add_subdirectory(sample)

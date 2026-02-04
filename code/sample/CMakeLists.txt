@@ -1,6 +1,6 @@
-set(TargetName FeedHandler)
+set(TargetName Sample)
 
-sbe_make_codec(FeedHandler-messaging
+FugoSBEMakeCodec(FeedHandler-messaging
   PACKAGE sbe_local
   SCHEMA ${CMAKE_CURRENT_SOURCE_DIR}/messaging.xml
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messaging
