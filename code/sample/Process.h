@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <fugo/service/BasicCommandReceiver.h>
-#include <fugo/service/BasicDataSender.h>
+#include <fugo/service/CommandQueue.h>
+#include <fugo/service/DataQueue.h>
 #include <fugo/service/Environment.h>
 #include <fugo/service/Logger.h>
 #include <fugo/service/ReceiverFeatures.h>
@@ -16,8 +16,8 @@ namespace app {
 
 using fugo::service::Environment;
 
-struct DataSender : public fugo::service::BasicDataSender, public fugo::service::SBESender {
-  using fugo::service::BasicDataSender::BasicDataSender;
+struct DataSender : public fugo::service::DataQueueProducer, public fugo::service::SBESender {
+  using fugo::service::DataQueueProducer::DataQueueProducer;
 
   template <typename BodyT>
   void beforeMessageSend(BodyT body) noexcept {
@@ -25,8 +25,8 @@ struct DataSender : public fugo::service::BasicDataSender, public fugo::service:
   }
 };
 
-struct CommandReceiver : public fugo::service::BasicCommandReceiver, public fugo::service::SBEReceiver {
-  using fugo::service::BasicCommandReceiver::BasicCommandReceiver;
+struct CommandReceiver : public fugo::service::CommandQueueConsumer, public fugo::service::SBEReceiver {
+  using fugo::service::CommandQueueConsumer::CommandQueueConsumer;
 };
 
 class Process {

@@ -12,11 +12,11 @@
 
 #include <fugo/sbe/Concepts.h>
 
-#include "sbe_local/Sequence_2.h"
+#include "sbe_local/Heartbeat.h"
 
 namespace app {
 
-static_assert(fugo::sbe::SBEMessage<sbe_local::Sequence_2>);
+static_assert(fugo::sbe::SBEMessage<sbe_local::Heartbeat>);
 
 namespace {
 
@@ -63,7 +63,7 @@ void Process::runInLoop() {
       }
     });
 
-    dataSender_.send<sbe_local::Sequence_2>([]([[maybe_unused]] auto body) {});
+    dataSender_.send<sbe_local::Heartbeat>([]([[maybe_unused]] auto body) {});
 
     loopRateLimit.sleep();
   }

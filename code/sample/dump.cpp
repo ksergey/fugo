@@ -8,14 +8,14 @@
 #include <fmt/ostream.h>
 
 #include <fugo/core/LoopRateLimit.h>
-#include <fugo/service/BasicDataReceiver.h>
+#include <fugo/service/DataQueue.h>
 #include <fugo/service/Environment.h>
 #include <fugo/service/ReceiverFeatures.h>
 
-#include "sbe_local/Sequence_2.h"
+#include "sbe_local/Heartbeat.h"
 
-struct DataReceiver : public fugo::service::BasicDataReceiver, fugo::service::SBEReceiver {
-  using fugo::service::BasicDataReceiver::BasicDataReceiver;
+struct DataReceiver : public fugo::service::DataQueueConsumer, fugo::service::SBEReceiver {
+  using fugo::service::DataQueueConsumer::DataQueueConsumer;
 };
 
 template <typename...>
@@ -50,7 +50,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     auto dataReceiver = DataReceiver{instanceName, env};
 
-    using Messages = MessageList<sbe_local::Sequence_2>;
+    using Messages = MessageList<sbe_local::Heartbeat>;
 
     while (true) {
       dataReceiver.receive<Messages>([](auto sbeBody) {
