@@ -11,7 +11,7 @@
 
 namespace fugo::service {
 
-class SBESender {
+class SBEProducer {
 public:
   template <typename MessageT, typename Fn>
     requires fugo::sbe::ConstLengthSBEMessage<MessageT>

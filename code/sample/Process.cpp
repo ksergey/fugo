@@ -12,12 +12,7 @@
 
 #include <fugo/sbe/Concepts.h>
 
-#include "sbe_local/Heartbeat.h"
-
 namespace app {
-
-static_assert(fugo::sbe::SBEMessage<sbe_local::Heartbeat>);
-
 namespace {
 
 constexpr auto kMaxCommandMessageSizeHint = std::size_t(100); // TODO:
@@ -26,8 +21,8 @@ constexpr auto kMaxCommandMessageSizeHint = std::size_t(100); // TODO:
 
 Process::Process(Config const& config, Environment const& env)
     : config_{config}, env_{env},
-      dataSender_{config_.service.instanceName, {config_.service.dataQueueSizeHint * (1 << 20)}, env_},
-      commandReceiver_{
+      dataProducer_{config_.service.instanceName, {config_.service.dataQueueSizeHint * (1 << 20)}, env_},
+      commandConsumer_{
           config_.service.instanceName, {kMaxCommandMessageSizeHint, config_.service.commandQueueLengthHint}, env_} {
 
   logNotice("Environment");
@@ -48,8 +43,12 @@ void Process::runInLoop() {
 
   auto loopRateLimit = fugo::LoopRateLimit();
 
+  dataProducer_.serviceUp();
+
   bool running = true;
   while (running) {
+    dataProducer_.keepAlive();
+
     // Handle process signals (SIGTERM, SIGINT, SIGHUP)
     fugo::notifyCatchedSignals([&](fugo::CatchedSignal const& signal) {
       // SIGTERM, SIGINT
@@ -63,10 +62,10 @@ void Process::runInLoop() {
       }
     });
 
-    dataSender_.send<sbe_local::Heartbeat>([]([[maybe_unused]] auto body) {});
-
     loopRateLimit.sleep();
   }
+
+  dataProducer_.serviceDown();
 
   fugo::restoreSignalHandlers();
 }

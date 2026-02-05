@@ -11,7 +11,7 @@
 
 namespace fugo::service {
 
-struct SBEReceiver {
+struct SBEConsumer {
   template <typename ListT, typename Fn>
   auto receive(this auto& impl, Fn&& fn) -> bool {
     using MessageHeader = fugo::sbe::SBEMessageHeader<ListT>;

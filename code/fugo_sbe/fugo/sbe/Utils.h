@@ -39,7 +39,7 @@ template <typename ListT>
 struct TakeFirst;
 template <template <typename...> typename List, typename T, typename... Ts>
 struct TakeFirst<List<T, Ts...>> {
-  using type = T;
+  using Type = T;
 };
 
 template <typename ListT>
@@ -47,14 +47,14 @@ struct SBEMessageHeaderImpl;
 template <template <typename...> typename List, typename... Ts>
   requires((SBEMessage<Ts> && ... && true))
 struct SBEMessageHeaderImpl<List<Ts...>> {
-  using type = typename TakeFirst<List<typename Ts::messageHeader>...>::type;
-  static_assert((std::is_same_v<type, typename Ts::messageHeader> && ... && true));
+  using Type = typename TakeFirst<List<typename Ts::messageHeader...>>::Type;
+  static_assert((std::is_same_v<Type, typename Ts::messageHeader> && ... && true));
 };
 
 } // namespace detail
 
 template <typename ListT>
-using SBEMessageHeader = typename detail::SBEMessageHeaderImpl<ListT>::type;
+using SBEMessageHeader = typename detail::SBEMessageHeaderImpl<ListT>::Type;
 
 namespace detail {
 

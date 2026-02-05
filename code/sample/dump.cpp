@@ -8,13 +8,13 @@
 #include <fmt/ostream.h>
 
 #include <fugo/core/LoopRateLimit.h>
+#include <fugo/service/ConsumerFeatures.h>
 #include <fugo/service/DataQueue.h>
 #include <fugo/service/Environment.h>
-#include <fugo/service/ReceiverFeatures.h>
 
-#include "sbe_local/Heartbeat.h"
+#include "Messaging.h"
 
-struct DataReceiver : public fugo::service::DataQueueConsumer, fugo::service::SBEReceiver {
+struct DataConsumer : public fugo::service::DataQueueConsumer, fugo::service::SBEConsumer {
   using fugo::service::DataQueueConsumer::DataQueueConsumer;
 };
 
@@ -48,9 +48,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     auto loopRateLimit = fugo::LoopRateLimit();
 
-    auto dataReceiver = DataReceiver{instanceName, env};
+    auto dataReceiver = DataConsumer{instanceName, env};
 
-    using Messages = MessageList<sbe_local::Heartbeat>;
+    using Messages = MessageList<sbe_local::Heartbeat, sbe_local::ServiceUp, sbe_local::ServiceDown>;
 
     while (true) {
       dataReceiver.receive<Messages>([](auto sbeBody) {
