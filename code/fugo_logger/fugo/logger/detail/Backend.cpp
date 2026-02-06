@@ -16,8 +16,8 @@ namespace fugo::logger::detail {
 namespace {
 
 struct Signal {
-  int sigNo;
-  std::string_view sigName;
+    int sigNo;
+    std::string_view sigName;
 };
 
 constexpr auto kFailureSignals = std::array{
@@ -29,65 +29,65 @@ constexpr auto kFailureSignals = std::array{
 };
 
 [[nodiscard]] auto threadShouldExit() noexcept -> bool {
-  static std::atomic<std::size_t> firstExit{0};
-  return 0 == firstExit.fetch_add(1, std::memory_order_relaxed);
+    static std::atomic<std::size_t> firstExit{0};
+    return 0 == firstExit.fetch_add(1, std::memory_order_relaxed);
 }
 
 void failureSignalHandler(
     [[maybe_unused]] int sigNo, [[maybe_unused]] siginfo_t* sigInfo, [[maybe_unused]] void* ucontext) {
-  auto const found = std::ranges::find_if(kFailureSignals, [&](auto const& sigInfo) {
-    return sigInfo.sigNo == sigNo;
-  });
-  if (found != kFailureSignals.end()) {
-    fmt::print(stderr, "Catched signal {}\n", found->sigName);
-  } else {
-    fmt::print(stderr, "Catched signal no {}\n", sigNo);
-  }
+    auto const found = std::ranges::find_if(kFailureSignals, [&](auto const& sigInfo) {
+        return sigInfo.sigNo == sigNo;
+    });
+    if (found != kFailureSignals.end()) {
+        fmt::print(stderr, "Catched signal {}\n", found->sigName);
+    } else {
+        fmt::print(stderr, "Catched signal no {}\n", sigNo);
+    }
 
-  if (!threadShouldExit()) {
-    std::this_thread::sleep_for(std::chrono::seconds{30});
-  }
+    if (!threadShouldExit()) {
+        std::this_thread::sleep_for(std::chrono::seconds{30});
+    }
 
-  Backend::instance()->stop();
+    Backend::instance()->stop();
 }
 
 void installAtExitHandler() noexcept {
-  auto const rc = std::atexit([] {
-    Backend::instance()->stop();
-  });
-  if (rc != 0) {
-    fmt::print(stderr, "Can't install at-exit handler\n");
-  }
+    auto const rc = std::atexit([] {
+        Backend::instance()->stop();
+    });
+    if (rc != 0) {
+        fmt::print(stderr, "Can't install at-exit handler\n");
+    }
 }
 
 void installFailureSignalHandler() noexcept {
-  struct ::sigaction sa{};
-  ::sigemptyset(&sa.sa_mask);
-  sa.sa_flags |= SA_SIGINFO;
-  sa.sa_sigaction = &failureSignalHandler;
-  for (auto const& sigInfo : kFailureSignals) {
-    if (auto const rc = ::sigaction(sigInfo.sigNo, &sa, nullptr); rc == -1) {
-      fmt::print(stderr, "Can't install signal handler for {} signal\n", sigInfo.sigName);
+    struct ::sigaction sa{};
+    ::sigemptyset(&sa.sa_mask);
+    sa.sa_flags |= SA_SIGINFO;
+    sa.sa_sigaction = &failureSignalHandler;
+    for (auto const& sigInfo : kFailureSignals) {
+        if (auto const rc = ::sigaction(sigInfo.sigNo, &sa, nullptr); rc == -1) {
+            fmt::print(stderr, "Can't install signal handler for {} signal\n", sigInfo.sigName);
+        }
     }
-  }
 }
 
 } // namespace
 
 void Backend::start(std::unique_ptr<Sink> sink, BackendOptions const& options) {
-  std::lock_guard guard{backendThreadMutex_};
+    std::lock_guard guard{backendThreadMutex_};
 
-  std::call_once(shutdownHandlesInstalledFlag_, [] {
-    installAtExitHandler();
-    installFailureSignalHandler();
-  });
+    std::call_once(shutdownHandlesInstalledFlag_, [] {
+        installAtExitHandler();
+        installFailureSignalHandler();
+    });
 
-  backendThread_.start(std::move(sink), options);
+    backendThread_.start(std::move(sink), options);
 }
 
 void Backend::stop() {
-  std::lock_guard guard{backendThreadMutex_};
-  backendThread_.stop();
+    std::lock_guard guard{backendThreadMutex_};
+    backendThread_.stop();
 }
 
 } // namespace fugo::logger::detail

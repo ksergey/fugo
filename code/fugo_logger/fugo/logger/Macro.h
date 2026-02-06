@@ -4,31 +4,31 @@
 #pragma once
 
 #define FUGO_LOG_CALL(LEVEL, FLAGS, FMT, ...)                                                                          \
-  do {                                                                                                                 \
-    static constexpr auto thisSourceLocation = std::source_location::current();                                        \
-    struct {                                                                                                           \
-      static constexpr auto location() noexcept -> std::source_location const* {                                       \
-        return &thisSourceLocation;                                                                                    \
-      }                                                                                                                \
-      static constexpr auto level() noexcept -> ::fugo::logger::LogLevel {                                             \
-        return ::fugo::logger::LogLevel::LEVEL;                                                                        \
-      }                                                                                                                \
-      static constexpr auto flags() noexcept -> int {                                                                  \
-        return FLAGS;                                                                                                  \
-      }                                                                                                                \
-      static constexpr auto format() noexcept -> std::string_view {                                                    \
-        return std::string_view{FMT};                                                                                  \
-      }                                                                                                                \
-    } thisMeta;                                                                                                        \
-    ::fugo::logger::logStatementTransform<decltype(thisMeta)>(__VA_ARGS__);                                            \
-  } while (0)
+    do {                                                                                                               \
+        static constexpr auto thisSourceLocation = std::source_location::current();                                    \
+        struct {                                                                                                       \
+            static constexpr auto location() noexcept -> std::source_location const* {                                 \
+                return &thisSourceLocation;                                                                            \
+            }                                                                                                          \
+            static constexpr auto level() noexcept -> ::fugo::logger::LogLevel {                                       \
+                return ::fugo::logger::LogLevel::LEVEL;                                                                \
+            }                                                                                                          \
+            static constexpr auto flags() noexcept -> int {                                                            \
+                return FLAGS;                                                                                          \
+            }                                                                                                          \
+            static constexpr auto format() noexcept -> std::string_view {                                              \
+                return std::string_view{FMT};                                                                          \
+            }                                                                                                          \
+        } thisMeta;                                                                                                    \
+        ::fugo::logger::logStatementTransform<decltype(thisMeta)>(__VA_ARGS__);                                        \
+    } while (0)
 
 #define FUGO_LOG(LEVEL, FLAGS, FMT, ...)                                                                               \
-  do {                                                                                                                 \
-    if (::fugo::logger::shouldLog(::fugo::logger::LogLevel::LEVEL)) {                                                  \
-      FUGO_LOG_CALL(LEVEL, FLAGS, FMT, __VA_ARGS__);                                                                   \
-    }                                                                                                                  \
-  } while (0)
+    do {                                                                                                               \
+        if (::fugo::logger::shouldLog(::fugo::logger::LogLevel::LEVEL)) {                                              \
+            FUGO_LOG_CALL(LEVEL, FLAGS, FMT, __VA_ARGS__);                                                             \
+        }                                                                                                              \
+    } while (0)
 
 #define logAlways(...) FUGO_LOG(Always, 0, __VA_ARGS__)
 #define logError(...) FUGO_LOG(Error, 0, __VA_ARGS__)

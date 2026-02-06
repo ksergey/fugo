@@ -15,23 +15,23 @@ namespace fugo::logger {
 void StdOutSink::write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
     std::thread::id const& threadID, std::string_view message) {
 
-  auto const style = [&]() noexcept -> fmt::text_style {
-    switch (level) {
-    case LogLevel::Error: return fg(fmt::color::red);
-    case LogLevel::Warning: return fg(fmt::color::orange);
-    case LogLevel::Debug: return fg(fmt::color::dim_gray);
-    case LogLevel::Trace: return fg(fmt::color::dim_gray);
-    default: break;
-    }
-    return fmt::text_style();
-  }();
+    auto const style = [&]() noexcept -> fmt::text_style {
+        switch (level) {
+        case LogLevel::Error: return fg(fmt::color::red);
+        case LogLevel::Warning: return fg(fmt::color::orange);
+        case LogLevel::Debug: return fg(fmt::color::dim_gray);
+        case LogLevel::Trace: return fg(fmt::color::dim_gray);
+        default: break;
+        }
+        return fmt::text_style();
+    }();
 
-  auto const formattedMessage = formatter_(location, level, timestamp, threadID, message);
-  fmt::print(style, "{}\n", formattedMessage);
+    auto const formattedMessage = formatter_(location, level, timestamp, threadID, message);
+    fmt::print(style, "{}\n", formattedMessage);
 }
 
 void StdOutSink::flush() {
-  std::fflush(stdout);
+    std::fflush(stdout);
 }
 
 } // namespace fugo::logger

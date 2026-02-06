@@ -15,7 +15,7 @@
 namespace app {
 
 template <typename... ArgsT>
-  requires(fugo::sbe::SBEMessage<ArgsT> && ...)
+    requires(fugo::sbe::SBEMessage<ArgsT> && ...)
 struct List;
 
 // using AdminMessages = List<sbe_local::Heartbeat, sbe_local::ServiceUp, sbe_local::ServiceDown>;

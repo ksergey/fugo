@@ -9,11 +9,11 @@ namespace fugo::core {
 
 template <CtString S>
 struct Str {
-  static constexpr auto value = static_cast<std::string_view>(S);
+    static constexpr auto value = static_cast<std::string_view>(S);
 };
 
 TEST_CASE("CtString") {
-  REQUIRE_EQ(Str<"Hello">::value, "Hello");
+    REQUIRE_EQ(Str<"Hello">::value, "Hello");
 }
 
 } // namespace fugo::core

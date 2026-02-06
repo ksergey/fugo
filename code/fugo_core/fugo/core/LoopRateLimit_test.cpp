@@ -13,12 +13,12 @@ namespace fugo::logger {
 
 TEST_CASE("LoopRateLimit") {
 
-  auto loopRateLimit = LoopRateLimit(std::chrono::milliseconds(500));
+    auto loopRateLimit = LoopRateLimit(std::chrono::milliseconds(500));
 
-  for (auto const i : std::views::iota(1) | std::views::take(10)) {
-    fmt::print(stdout, "iteration #{}\n", i);
-    loopRateLimit.sleep();
-  }
+    for (auto const i : std::views::iota(1) | std::views::take(10)) {
+        fmt::print(stdout, "iteration #{}\n", i);
+        loopRateLimit.sleep();
+    }
 }
 
 } // namespace fugo::logger

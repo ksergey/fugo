@@ -11,25 +11,25 @@
 namespace app {
 
 struct ServiceConfig {
-  /// Service instance name
-  std::string instanceName;
-  /// Data queue size hint in Mb (min size 20)
-  std::size_t dataQueueSizeHint;
-  /// Command queue length hint (min size 1000)
-  std::size_t commandQueueLengthHint;
+    /// Service instance name
+    std::string instanceName;
+    /// Data queue size hint in Mb (min size 20)
+    std::size_t dataQueueSizeHint;
+    /// Command queue length hint (min size 1000)
+    std::size_t commandQueueLengthHint;
 };
 
 struct LoggerConfig : fugo::service::LoggerOptions {};
 
 struct Config {
-  ServiceConfig service;
-  LoggerConfig logger;
+    ServiceConfig service;
+    LoggerConfig logger;
 
-  /// Load config from json file
-  Config(std::filesystem::path const& path);
+    /// Load config from json file
+    Config(std::filesystem::path const& path);
 
-  /// Serialize to string
-  [[nodiscard]] auto toString() const -> std::string;
+    /// Serialize to string
+    [[nodiscard]] auto toString() const -> std::string;
 };
 
 } // namespace app

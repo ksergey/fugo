@@ -10,17 +10,17 @@
 namespace fugo::config {
 
 struct Exception : std::runtime_error {
-  using std::runtime_error::runtime_error;
+    using std::runtime_error::runtime_error;
 
-  template <typename... Args>
-  Exception(fmt::format_string<Args...> fmtStr, Args&&... args)
-      : std::runtime_error{fmt::format(fmtStr, std::forward<Args>(args)...)} {}
+    template <typename... Args>
+    Exception(fmt::format_string<Args...> fmtStr, Args&&... args)
+        : std::runtime_error{fmt::format(fmtStr, std::forward<Args>(args)...)} {}
 
-  virtual ~Exception() {}
+    virtual ~Exception() {}
 };
 
 struct ValidateError : Exception {
-  using Exception::Exception;
+    using Exception::Exception;
 };
 
 } // namespace fugo::config

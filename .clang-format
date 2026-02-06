@@ -1,6 +1,7 @@
 ---
 Language: Cpp
 Standard: c++20
+IndentWidth: 4
 ColumnLimit: 120
 AccessModifierOffset: -2
 DerivePointerAlignment: false

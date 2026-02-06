@@ -8,40 +8,40 @@
 namespace fugo::logger::detail {
 
 auto LoggerQueueManager::createProducer(std::optional<std::size_t> capacityHint) noexcept -> LoggerQueue::Producer {
-  if (!capacityHint) {
-    capacityHint = this->queueCapacityHint();
-  }
+    if (!capacityHint) {
+        capacityHint = this->queueCapacityHint();
+    }
 
-  auto [producer, consumer] = LoggerQueue::createProducerAndConsumer("logger-queue", *capacityHint);
-  if (!producer || !consumer) {
-    return {};
-  }
+    auto [producer, consumer] = LoggerQueue::createProducerAndConsumer("logger-queue", *capacityHint);
+    if (!producer || !consumer) {
+        return {};
+    }
 
-  {
-    std::lock_guard guard(pendingAddQueuesLock_);
-    pendingAddQueues_.push_back(std::move(consumer));
-    rebuildQueuesFlag_.store(true, std::memory_order_relaxed);
-  }
+    {
+        std::lock_guard guard(pendingAddQueuesLock_);
+        pendingAddQueues_.push_back(std::move(consumer));
+        rebuildQueuesFlag_.store(true, std::memory_order_relaxed);
+    }
 
-  return std::move(producer);
+    return std::move(producer);
 }
 
 void LoggerQueueManager::rebuildQueues() {
-  // Drop closed queues
-  std::erase_if(queues_, [](LoggerQueue::Consumer const& consumer) {
-    assert(static_cast<bool>(consumer));
-    return consumer.isClosed();
-  });
+    // Drop closed queues
+    std::erase_if(queues_, [](LoggerQueue::Consumer const& consumer) {
+        assert(static_cast<bool>(consumer));
+        return consumer.isClosed();
+    });
 
-  // Add pending queues
-  std::lock_guard guard(pendingAddQueuesLock_);
-  if (!pendingAddQueues_.empty()) {
-    for (LoggerQueue::Consumer& consumer : pendingAddQueues_) {
-      assert(static_cast<bool>(consumer));
-      queues_.push_back(std::move(consumer));
+    // Add pending queues
+    std::lock_guard guard(pendingAddQueuesLock_);
+    if (!pendingAddQueues_.empty()) {
+        for (LoggerQueue::Consumer& consumer : pendingAddQueues_) {
+            assert(static_cast<bool>(consumer));
+            queues_.push_back(std::move(consumer));
+        }
+        pendingAddQueues_.clear();
     }
-    pendingAddQueues_.clear();
-  }
 }
 
 } // namespace fugo::logger::detail

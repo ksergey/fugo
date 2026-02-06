@@ -30,16 +30,16 @@ constexpr auto kFlagRety = int(1 << 0);
 
 /// Log record metadata
 struct RecordMetadata {
-  /// Log entry source location
-  std::source_location const* location;
-  /// Log entry verbosity level
-  LogLevel level;
-  /// Format string
-  std::string_view format;
-  /// Log entry flags
-  int flags;
-  /// Function to decode log entry args from a buffer
-  DecodeArgsFn decodeArgs;
+    /// Log entry source location
+    std::source_location const* location;
+    /// Log entry verbosity level
+    LogLevel level;
+    /// Format string
+    std::string_view format;
+    /// Log entry flags
+    int flags;
+    /// Function to decode log entry args from a buffer
+    DecodeArgsFn decodeArgs;
 };
 static_assert(std::is_trivially_copyable_v<RecordMetadata>);
 
@@ -51,16 +51,16 @@ enum EventType { LogRecord };
 
 /// Log event header
 struct RecordHeader {
-  EventType type;
+    EventType type;
 };
 static_assert(std::is_trivially_copyable_v<RecordHeader>);
 
 /// Log record header
 struct LogRecordHeader {
-  /// Log record timestamp
-  Clock::Timestamp timestamp;
-  /// Log record thread
-  std::thread::id threadID;
+    /// Log record timestamp
+    Clock::Timestamp timestamp;
+    /// Log record thread
+    std::thread::id threadID;
 };
 static_assert(std::is_trivially_copyable_v<LogRecordHeader>);
 

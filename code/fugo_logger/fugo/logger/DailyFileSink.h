@@ -12,37 +12,37 @@
 namespace fugo::logger {
 
 class DailyFileSink final : public Sink {
-private:
-  std::filesystem::path destination_;
-  std::string prefix_;
-  FileStream fileStream_;
-  PatternFormatter formatter_;
-  std::time_t nextRotateTime_ = 0;
+  private:
+    std::filesystem::path destination_;
+    std::string prefix_;
+    FileStream fileStream_;
+    PatternFormatter formatter_;
+    std::time_t nextRotateTime_ = 0;
 
-public:
-  DailyFileSink(DailyFileSink const&) = delete;
-  DailyFileSink& operator=(DailyFileSink const&) = delete;
+  public:
+    DailyFileSink(DailyFileSink const&) = delete;
+    DailyFileSink& operator=(DailyFileSink const&) = delete;
 
-  DailyFileSink(
-      std::filesystem::path const& destination = std::filesystem::current_path(), std::string prefix = std::string());
+    DailyFileSink(
+        std::filesystem::path const& destination = std::filesystem::current_path(), std::string prefix = std::string());
 
-  /// Formatting pattern
-  [[nodiscard]] auto pattern() const noexcept -> std::string const& {
-    return formatter_.pattern();
-  }
+    /// Formatting pattern
+    [[nodiscard]] auto pattern() const noexcept -> std::string const& {
+        return formatter_.pattern();
+    }
 
-  /// Set formatting pattern
-  void setPattern(std::string value) noexcept {
-    formatter_.setPattern(std::move(value));
-  }
+    /// Set formatting pattern
+    void setPattern(std::string value) noexcept {
+        formatter_.setPattern(std::move(value));
+    }
 
-  void write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
-      std::thread::id const& threadID, std::string_view message) override;
+    void write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
+        std::thread::id const& threadID, std::string_view message) override;
 
-  void flush() override;
+    void flush() override;
 
-private:
-  [[nodiscard]] auto reopen(std::time_t now) -> bool;
+  private:
+    [[nodiscard]] auto reopen(std::time_t now) -> bool;
 };
 
 } // namespace fugo::logger

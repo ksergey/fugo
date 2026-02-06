@@ -8,10 +8,10 @@
 namespace fugo {
 
 TEST_CASE("Thread Name") {
-  REQUIRE(setThisThreadName("SuperRipper").has_value());
-  auto const rc = getThisThreadName();
-  REQUIRE(rc.has_value());
-  REQUIRE(rc.value() == "SuperRipper");
+    REQUIRE(setThisThreadName("SuperRipper").has_value());
+    auto const rc = getThisThreadName();
+    REQUIRE(rc.has_value());
+    REQUIRE(rc.value() == "SuperRipper");
 }
 
 } // namespace fugo

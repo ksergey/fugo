@@ -17,40 +17,40 @@
 namespace fugo::logger::detail {
 
 class BackendThread final {
-private:
-  LoggerQueueManager& queueManager_;
-  // Backend thread
-  std::jthread thread_;
-  // Flag indicates backend thread running
-  std::atomic<bool> running_{false};
-  // Cache for message formatting
-  fmt::memory_buffer formatBuffer_;
+  private:
+    LoggerQueueManager& queueManager_;
+    // Backend thread
+    std::jthread thread_;
+    // Flag indicates backend thread running
+    std::atomic<bool> running_{false};
+    // Cache for message formatting
+    fmt::memory_buffer formatBuffer_;
 
-public:
-  BackendThread(BackendThread const&) = delete;
-  BackendThread& operator=(BackendThread const&) = delete;
+  public:
+    BackendThread(BackendThread const&) = delete;
+    BackendThread& operator=(BackendThread const&) = delete;
 
-  /// Constructor
-  explicit BackendThread(LoggerQueueManager& queueManager);
+    /// Constructor
+    explicit BackendThread(LoggerQueueManager& queueManager);
 
-  /// Destructor
-  ~BackendThread();
+    /// Destructor
+    ~BackendThread();
 
-  /// Return true on backend thread running
-  [[nodiscard]] FUGO_FORCE_INLINE auto isRunning() const noexcept {
-    return running_.load(std::memory_order_acquire);
-  }
+    /// Return true on backend thread running
+    [[nodiscard]] FUGO_FORCE_INLINE auto isRunning() const noexcept {
+        return running_.load(std::memory_order_acquire);
+    }
 
-  /// Start backend thread
-  void start(std::unique_ptr<Sink> sink, BackendOptions const& options);
+    /// Start backend thread
+    void start(std::unique_ptr<Sink> sink, BackendOptions const& options);
 
-  /// Stop backend thread
-  void stop();
+    /// Stop backend thread
+    void stop();
 
-private:
-  auto processIncomingLogRecords(Sink& sink) -> std::size_t;
-  void processLogRecord(
-      Sink& sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata, std::byte const* argsBuffer);
+  private:
+    auto processIncomingLogRecords(Sink& sink) -> std::size_t;
+    void processLogRecord(Sink& sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata,
+        std::byte const* argsBuffer);
 };
 
 } // namespace fugo::logger::detail

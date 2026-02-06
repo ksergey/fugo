@@ -25,49 +25,49 @@ Process::Process(Config const& config, Environment const& env)
       commandConsumer_{
           config_.service.instanceName, {kMaxCommandMessageSizeHint, config_.service.commandQueueLengthHint}, env_} {
 
-  logNotice("Environment");
-  logNotice("  instanceName = \"{}\"/\"{}\"", env_.instanceName(), config_.service.instanceName);
-  logNotice("  scope = \"{}\"", env_.scope());
-  logNotice("  systemPath = \"{}\"", env_.systemPath());
-  logNotice("  dataPath = \"{}\"", env_.dataPath());
+    logNotice("Environment");
+    logNotice("  instanceName = \"{}\"/\"{}\"", env_.instanceName(), config_.service.instanceName);
+    logNotice("  scope = \"{}\"", env_.scope());
+    logNotice("  systemPath = \"{}\"", env_.systemPath());
+    logNotice("  dataPath = \"{}\"", env_.dataPath());
 
-  logNotice("Process created");
+    logNotice("Process created");
 }
 
 Process::~Process() {
-  logNotice("Process destroyed");
+    logNotice("Process destroyed");
 }
 
 void Process::runInLoop() {
-  fugo::installSignalHandlers();
+    fugo::installSignalHandlers();
 
-  auto loopRateLimit = fugo::LoopRateLimit();
+    auto loopRateLimit = fugo::LoopRateLimit();
 
-  dataProducer_.serviceUp();
+    dataProducer_.serviceUp();
 
-  bool running = true;
-  while (running) {
-    dataProducer_.keepAlive();
+    bool running = true;
+    while (running) {
+        dataProducer_.keepAlive();
 
-    // Handle process signals (SIGTERM, SIGINT, SIGHUP)
-    fugo::notifyCatchedSignals([&](fugo::CatchedSignal const& signal) {
-      // SIGTERM, SIGINT
-      if (signal.shutdown()) {
-        logDebug("Shutdown request");
-        running = false;
-      }
-      // SIGHUP
-      if (signal.reload()) {
-        logDebug("Reload signal catched");
-      }
-    });
+        // Handle process signals (SIGTERM, SIGINT, SIGHUP)
+        fugo::notifyCatchedSignals([&](fugo::CatchedSignal const& signal) {
+            // SIGTERM, SIGINT
+            if (signal.shutdown()) {
+                logDebug("Shutdown request");
+                running = false;
+            }
+            // SIGHUP
+            if (signal.reload()) {
+                logDebug("Reload signal catched");
+            }
+        });
 
-    loopRateLimit.sleep();
-  }
+        loopRateLimit.sleep();
+    }
 
-  dataProducer_.serviceDown();
+    dataProducer_.serviceDown();
 
-  fugo::restoreSignalHandlers();
+    fugo::restoreSignalHandlers();
 }
 
 } // namespace app

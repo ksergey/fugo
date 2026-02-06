@@ -8,10 +8,10 @@
 namespace fugo::logger {
 
 auto TSCClock::toTimeSpec(std::int64_t value) noexcept -> ::timespec {
-  static constexpr auto kNanosecondsInSecond =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)).count();
-  auto const nsSinceEpoch = detail::TicksHelper::instance()->timeSinceEpoch(value);
-  return ::timespec{.tv_sec = nsSinceEpoch / kNanosecondsInSecond, .tv_nsec = nsSinceEpoch % kNanosecondsInSecond};
+    static constexpr auto kNanosecondsInSecond =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::seconds(1)).count();
+    auto const nsSinceEpoch = detail::TicksHelper::instance()->timeSinceEpoch(value);
+    return ::timespec{.tv_sec = nsSinceEpoch / kNanosecondsInSecond, .tv_nsec = nsSinceEpoch % kNanosecondsInSecond};
 }
 
 } // namespace fugo::logger

@@ -11,11 +11,11 @@ namespace fugo::sbe {
 /// Detect a SBE message fly-weight class
 template <typename T>
 concept SBEMessage = requires {
-  { T::SBE_BLOCK_LENGTH };
-  { T::SBE_TEMPLATE_ID };
-  { T::SBE_SCHEMA_ID };
-  { T::SBE_SCHEMA_VERSION };
-  typename T::messageHeader;
+    { T::SBE_BLOCK_LENGTH };
+    { T::SBE_TEMPLATE_ID };
+    { T::SBE_SCHEMA_ID };
+    { T::SBE_SCHEMA_VERSION };
+    typename T::messageHeader;
 };
 
 template <typename T>

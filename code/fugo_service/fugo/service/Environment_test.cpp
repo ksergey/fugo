@@ -10,15 +10,15 @@
 namespace fugo::service {
 
 TEST_CASE("Environment") {
-  auto const env = Environment{{}, {}};
+    auto const env = Environment{{}, {}};
 
-  std::print("scope: {}\n", env.scope());
-  std::print("system path: {}\n", env.systemPath().c_str());
-  std::print("data path: {}\n", env.dataPath().c_str());
+    std::print("scope: {}\n", env.scope());
+    std::print("system path: {}\n", env.systemPath().c_str());
+    std::print("data path: {}\n", env.dataPath().c_str());
 
-  if (auto const result = env.findFile("xxx"); result) {
-    std::print("found(xxx): {}\n", result.value().c_str());
-  }
+    if (auto const result = env.findFile("xxx"); result) {
+        std::print("found(xxx): {}\n", result.value().c_str());
+    }
 }
 
 } // namespace fugo::service

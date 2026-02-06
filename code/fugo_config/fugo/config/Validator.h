@@ -18,89 +18,89 @@ concept Validator = requires { typename T::Validator; };
 namespace detail {
 
 template <typename TypeA, typename TypeB>
-  requires Validator<TypeA> && Validator<TypeB>
+    requires Validator<TypeA> && Validator<TypeB>
 struct ValidatorAnd {
-  using Validator = void;
+    using Validator = void;
 
-  TypeA validatorA;
-  TypeB validatorB;
+    TypeA validatorA;
+    TypeB validatorB;
 
-  template <typename T>
-  constexpr auto operator()(T const& value) const -> bool {
-    return validatorA(value) && validatorB(value);
-  }
+    template <typename T>
+    constexpr auto operator()(T const& value) const -> bool {
+        return validatorA(value) && validatorB(value);
+    }
 };
 
 } // namespace detail
 
 template <typename TypeA, typename TypeB>
-  requires Validator<TypeA> && Validator<TypeB>
+    requires Validator<TypeA> && Validator<TypeB>
 consteval auto operator&&(TypeA&& a, TypeB&& b) noexcept -> detail::ValidatorAnd<TypeA, TypeB> {
-  return {std::move(a), std::move(b)};
+    return {std::move(a), std::move(b)};
 }
 
 namespace detail {
 
 template <typename TypeA, typename TypeB>
-  requires Validator<TypeA> && Validator<TypeB>
+    requires Validator<TypeA> && Validator<TypeB>
 struct ValidatorOr {
-  using Validator = void;
+    using Validator = void;
 
-  TypeA validatorA;
-  TypeB validatorB;
+    TypeA validatorA;
+    TypeB validatorB;
 
-  template <typename T>
-  constexpr auto operator()(T const& value) const -> bool {
-    return validatorA(value) || validatorB(value);
-  }
+    template <typename T>
+    constexpr auto operator()(T const& value) const -> bool {
+        return validatorA(value) || validatorB(value);
+    }
 };
 
 } // namespace detail
 
 template <typename TypeA, typename TypeB>
-  requires Validator<TypeA> && Validator<TypeB>
+    requires Validator<TypeA> && Validator<TypeB>
 consteval auto operator||(TypeA&& a, TypeB&& b) noexcept -> detail::ValidatorOr<TypeA, TypeB> {
-  return {std::move(a), std::move(b)};
+    return {std::move(a), std::move(b)};
 }
 
 namespace detail {
 
 template <typename TypeT>
-  requires Validator<TypeT>
+    requires Validator<TypeT>
 struct ValidatorNot {
-  using Validator = void;
+    using Validator = void;
 
-  TypeT validator;
+    TypeT validator;
 
-  template <typename T>
-  constexpr auto operator()(T const& value) const -> bool {
-    return !validator(value);
-  }
+    template <typename T>
+    constexpr auto operator()(T const& value) const -> bool {
+        return !validator(value);
+    }
 };
 
 } // namespace detail
 
 template <typename TypeT>
-  requires Validator<TypeT>
+    requires Validator<TypeT>
 consteval auto operator!(TypeT&& a) noexcept -> detail::ValidatorNot<TypeT> {
-  return {std::move(a)};
+    return {std::move(a)};
 }
 
 namespace detail {
 
 template <typename T, template <typename> typename C>
 struct CompareWith {
-  using Validator = void;
+    using Validator = void;
 
-  T const withValue;
+    T const withValue;
 
-  constexpr auto operator()(T const& value) const noexcept -> bool {
-    return C<T>{}(value, withValue);
-  }
-  template <typename U>
-  constexpr auto operator()(U const& value) const noexcept -> bool {
-    return C<void>{}(value, withValue);
-  }
+    constexpr auto operator()(T const& value) const noexcept -> bool {
+        return C<T>{}(value, withValue);
+    }
+    template <typename U>
+    constexpr auto operator()(U const& value) const noexcept -> bool {
+        return C<void>{}(value, withValue);
+    }
 };
 
 template <std::size_t N, template <typename> typename C>
@@ -111,51 +111,51 @@ struct CompareWith<char[N], C> : CompareWith<std::string_view, C> {};
 /// Compare: equal
 template <typename T>
 consteval auto eq(T const& value) -> detail::CompareWith<T, std::equal_to> {
-  return {value};
+    return {value};
 }
 
 /// Compare: not equal
 template <typename T>
 consteval auto e(T const& value) -> detail::CompareWith<T, std::not_equal_to> {
-  return {value};
+    return {value};
 }
 
 /// Compare: greater
 template <typename T>
 consteval auto gt(T const& value) -> detail::CompareWith<T, std::greater> {
-  return {value};
+    return {value};
 }
 
 /// Compare: greater or equal
 template <typename T>
 consteval auto ge(T const& value) -> detail::CompareWith<T, std::greater_equal> {
-  return {value};
+    return {value};
 }
 
 /// Compare: less
 template <typename T>
 consteval auto lt(T const& value) -> detail::CompareWith<T, std::less> {
-  return {value};
+    return {value};
 }
 
 /// Compare: less or equal
 template <typename T>
 consteval auto le(T const& value) -> detail::CompareWith<T, std::less_equal> {
-  return {value};
+    return {value};
 }
 
 namespace detail {
 
 template <typename FnT>
 struct Fn {
-  using Validator = void;
+    using Validator = void;
 
-  FnT fn;
+    FnT fn;
 
-  template <typename U>
-  constexpr auto operator()(U const& value) const noexcept -> bool {
-    return fn(value);
-  }
+    template <typename U>
+    constexpr auto operator()(U const& value) const noexcept -> bool {
+        return fn(value);
+    }
 };
 
 template <typename FnT>
@@ -164,13 +164,13 @@ Fn(FnT) -> Fn<FnT>;
 // helper type for the visitor
 template <class... Ts>
 struct Overloads : Ts... {
-  using Ts::operator()...;
+    using Ts::operator()...;
 };
 
 } // namespace detail
 
 consteval auto empty() {
-  // clang-format off
+    // clang-format off
   return detail::Fn{detail::Overloads{
     [](auto const& value) {
       return std::empty(value);
@@ -179,29 +179,29 @@ consteval auto empty() {
         return *value == '\0';
     }
   }};
-  // clang-format on
+    // clang-format on
 }
 
 template <typename T, std::size_t N>
 consteval auto oneOf(T const (&values)[N]) {
-  return detail::Fn([values = std::to_array(values)](auto const& value) -> bool {
-    return std::find(values.begin(), values.end(), value) != values.end();
-  });
+    return detail::Fn([values = std::to_array(values)](auto const& value) -> bool {
+        return std::find(values.begin(), values.end(), value) != values.end();
+    });
 }
 
 /// @overload
 template <typename... Ts>
 consteval auto oneOf(Ts const&... args) {
-  using T = std::common_type_t<Ts...>;
-  return oneOf<T, sizeof...(Ts)>({static_cast<T>(args)...});
+    using T = std::common_type_t<Ts...>;
+    return oneOf<T, sizeof...(Ts)>({static_cast<T>(args)...});
 }
 
 /// Match string-value to regex pattern
 inline auto match(char const* pattern) {
-  return detail::Fn([regex = std::regex(pattern)](std::string_view value) -> bool {
-    std::cmatch match;
-    return std::regex_match(value.begin(), value.end(), match, regex);
-  });
+    return detail::Fn([regex = std::regex(pattern)](std::string_view value) -> bool {
+        std::cmatch match;
+        return std::regex_match(value.begin(), value.end(), match, regex);
+    });
 }
 
 } // namespace fugo::config

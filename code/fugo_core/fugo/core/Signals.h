@@ -19,7 +19,7 @@ namespace detail {
 
 template <int SigNo>
 [[nodiscard]] constexpr auto isSignalBitSet(std::uint64_t value) noexcept -> bool {
-  return ((1ull << SigNo) & value) == (1ull << SigNo);
+    return ((1ull << SigNo) & value) == (1ull << SigNo);
 }
 
 } // namespace detail
@@ -32,27 +32,27 @@ void restoreSignalHandlers();
 
 /// Helper for manage active signals
 struct CatchedSignal {
-  std::uint64_t signals;
+    std::uint64_t signals;
 
-  /// Return true on shutdown signals catched
-  [[nodiscard]] constexpr auto shutdown() const noexcept -> bool {
-    return detail::isSignalBitSet<SIGINT>(signals) || detail::isSignalBitSet<SIGTERM>(signals);
-  }
+    /// Return true on shutdown signals catched
+    [[nodiscard]] constexpr auto shutdown() const noexcept -> bool {
+        return detail::isSignalBitSet<SIGINT>(signals) || detail::isSignalBitSet<SIGTERM>(signals);
+    }
 
-  /// Return true on reload signals catched
-  [[nodiscard]] constexpr auto reload() const noexcept -> bool {
-    return detail::isSignalBitSet<SIGHUP>(signals);
-  }
+    /// Return true on reload signals catched
+    [[nodiscard]] constexpr auto reload() const noexcept -> bool {
+        return detail::isSignalBitSet<SIGHUP>(signals);
+    }
 };
 
 /// Notify on a signal catched
 template <typename Fn>
-  requires std::invocable<Fn, CatchedSignal>
+    requires std::invocable<Fn, CatchedSignal>
 FUGO_FORCE_INLINE void notifyCatchedSignals(Fn&& fn) {
-  auto const pendingSignals = gPendingSignals.exchange(0, std::memory_order_relaxed);
-  if (pendingSignals > 0) [[unlikely]] {
-    std::invoke(std::forward<Fn>(fn), CatchedSignal{pendingSignals});
-  }
+    auto const pendingSignals = gPendingSignals.exchange(0, std::memory_order_relaxed);
+    if (pendingSignals > 0) [[unlikely]] {
+        std::invoke(std::forward<Fn>(fn), CatchedSignal{pendingSignals});
+    }
 }
 
 } // namespace core

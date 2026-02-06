@@ -8,28 +8,28 @@
 namespace fugo::logger {
 
 class StdOutSink final : public Sink {
-private:
-  PatternFormatter formatter_;
+  private:
+    PatternFormatter formatter_;
 
-public:
-  StdOutSink(StdOutSink const&) = delete;
-  StdOutSink& operator=(StdOutSink const&) = delete;
-  StdOutSink() = default;
+  public:
+    StdOutSink(StdOutSink const&) = delete;
+    StdOutSink& operator=(StdOutSink const&) = delete;
+    StdOutSink() = default;
 
-  /// Formatting pattern
-  [[nodiscard]] auto pattern() const noexcept -> std::string const& {
-    return formatter_.pattern();
-  }
+    /// Formatting pattern
+    [[nodiscard]] auto pattern() const noexcept -> std::string const& {
+        return formatter_.pattern();
+    }
 
-  /// Set formatting pattern
-  void setPattern(std::string value) noexcept {
-    formatter_.setPattern(std::move(value));
-  }
+    /// Set formatting pattern
+    void setPattern(std::string value) noexcept {
+        formatter_.setPattern(std::move(value));
+    }
 
-  void write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
-      std::thread::id const& threadID, std::string_view message) override;
+    void write(std::source_location const& location, LogLevel level, ::timespec const& timestamp,
+        std::thread::id const& threadID, std::string_view message) override;
 
-  void flush() override;
+    void flush() override;
 };
 
 } // namespace fugo::logger
