@@ -15,11 +15,11 @@ namespace core {
 
 /// Limit process loop min iteration time
 class LoopRateLimit {
-  private:
+private:
     std::chrono::nanoseconds minLoopDuration_;
     std::int64_t deadline_;
 
-  public:
+public:
     explicit LoopRateLimit(std::chrono::nanoseconds minLoopDuration = std::chrono::milliseconds(100))
         : minLoopDuration_{minLoopDuration}, deadline_{wallClockNow() + minLoopDuration_.count()} {}
 
@@ -37,7 +37,7 @@ class LoopRateLimit {
         deadline_ = 0;
     }
 
-  private:
+private:
     // Get current timepoint in nanosecond resolution
     [[nodiscard]] FUGO_FORCE_INLINE static auto wallClockNow() noexcept -> std::int64_t {
         ::timespec ts;

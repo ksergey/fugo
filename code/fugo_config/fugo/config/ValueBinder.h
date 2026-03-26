@@ -28,12 +28,12 @@ struct Value {
 /// @tparam ValidatorT is storage for holding a value validator
 template <CtString Name, typename T, typename DefaultValueT = detail::None, typename ValidatorT = detail::None>
 class ValueBinder {
-  private:
+private:
     T* valuePtr_;
     [[no_unique_address]] DefaultValueT defaultValue_;
     [[no_unique_address]] ValidatorT validator_;
 
-  public:
+public:
     ValueBinder(ValueBinder const&) = delete;
     ValueBinder& operator=(ValueBinder const&) = delete;
     ValueBinder(ValueBinder&&) = delete;

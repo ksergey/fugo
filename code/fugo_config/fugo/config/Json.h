@@ -94,10 +94,10 @@ struct JsonBinder {
 namespace detail {
 
 class JsonInput {
-  private:
+private:
     nlohmann::json const& json_;
 
-  public:
+public:
     JsonInput(nlohmann::json const& json) noexcept : json_{json} {}
 
     /// operator& for serialize(...).
@@ -110,10 +110,10 @@ class JsonInput {
 
 /// Helper for map `operator&` to `Binder::to`.
 class JsonOutput {
-  private:
+private:
     nlohmann::json& json_;
 
-  public:
+public:
     JsonOutput(nlohmann::json& json) noexcept : json_{json} {}
 
     /// operator& for serialize(...).

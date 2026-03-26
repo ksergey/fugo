@@ -93,7 +93,7 @@ struct BoundedSPSCRawQueueDetail {
 /// Implements a SPSC queue producer
 template <typename Traits>
 class BoundedSPSCRawQueueProducer {
-  private:
+private:
     using QueueDetail = BoundedSPSCRawQueueDetail<Traits>;
     using MemoryHeader = typename QueueDetail::MemoryHeader;
     using MessageHeader = typename QueueDetail::MessageHeader;
@@ -105,7 +105,7 @@ class BoundedSPSCRawQueueProducer {
     std::size_t minFreeSpace_ = 0;
     MessageHeader* lastMessageHeader_ = nullptr;
 
-  public:
+public:
     BoundedSPSCRawQueueProducer() = default;
     ~BoundedSPSCRawQueueProducer() = default;
 
@@ -245,7 +245,7 @@ class BoundedSPSCRawQueueProducer {
 /// Implements a SPSC queue consumer
 template <typename Traits>
 class BoundedSPSCRawQueueConsumer {
-  private:
+private:
     using QueueDetail = BoundedSPSCRawQueueDetail<Traits>;
     using MemoryHeader = typename QueueDetail::MemoryHeader;
     using MessageHeader = typename QueueDetail::MessageHeader;
@@ -257,7 +257,7 @@ class BoundedSPSCRawQueueConsumer {
     std::size_t producerPosCache_ = 0;
     MessageHeader* lastMessageHeader_ = nullptr;
 
-  public:
+public:
     BoundedSPSCRawQueueConsumer() = default;
     ~BoundedSPSCRawQueueConsumer() = default;
 
@@ -359,14 +359,14 @@ using BoundedSPSCRawQueue = BoundedSPSCRawQueueImpl<BoundedSPSCRawQueueDefaultTr
 
 template <typename Traits>
 class BoundedSPSCRawQueueImpl {
-  private:
+private:
     using QueueDetail = detail::BoundedSPSCRawQueueDetail<Traits>;
     using MemoryHeader = typename QueueDetail::MemoryHeader;
     using MessageHeader = typename QueueDetail::MessageHeader;
 
     turboq::File file_;
 
-  public:
+public:
     using Producer = detail::BoundedSPSCRawQueueProducer<Traits>;
     using Consumer = detail::BoundedSPSCRawQueueConsumer<Traits>;
 

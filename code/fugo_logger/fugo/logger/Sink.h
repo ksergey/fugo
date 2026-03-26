@@ -50,11 +50,11 @@ constexpr auto toShortString(LogLevel level) noexcept -> std::string_view {
 ///   - file - full path to source file
 ///   - line - line at source file
 class PatternFormatter {
-  private:
+private:
     std::string pattern_ = "{timestamp} [{level}] ({threadID}) {message} ({file}:{line})";
     fmt::memory_buffer buffer_;
 
-  public:
+public:
     PatternFormatter() = default;
 
     /// Current pattern

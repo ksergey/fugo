@@ -15,11 +15,11 @@ namespace core {
 
 /// Wrapper around FILE*
 class FileStream {
-  private:
+private:
     FILE* file_ = nullptr;
     bool owns_ = false;
 
-  public:
+public:
     FileStream(FileStream const&) = delete;
     FileStream& operator=(FileStream const&) = delete;
 

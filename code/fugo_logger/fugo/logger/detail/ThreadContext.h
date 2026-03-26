@@ -15,11 +15,11 @@
 namespace fugo::logger::detail {
 
 class ThreadContext final {
-  private:
+private:
     LoggerQueue::Producer producer_;
     std::thread::id threadID_;
 
-  public:
+public:
     ThreadContext(ThreadContext const&) = delete;
     ThreadContext& operator=(ThreadContext const&) = delete;
     ThreadContext(ThreadContext&&) = default;

@@ -17,14 +17,14 @@ namespace fugo::logger::detail {
 
 // See https://github.com/odygrd/quill/blob/master/quill/src/detail/misc/RdtscClock.cpp
 class TicksHelper {
-  private:
+private:
     std::int64_t wallClockBase_{0};
     std::int64_t tscClockBase_{0};
     std::int64_t resyncIntervalTicks_ = 0;
     std::int64_t resyncIntervalOriginal_ = 0;
     double nanosecondsPerTick_{0.0};
 
-  public:
+public:
     [[nodiscard]] FUGO_FORCE_INLINE static auto instance() noexcept -> TicksHelper* {
         static TicksHelper instance;
         return &instance;
@@ -46,7 +46,7 @@ class TicksHelper {
         return nanosecondsPerTick_;
     }
 
-  private:
+private:
     TicksHelper(std::chrono::nanoseconds resyncInterval = std::chrono::milliseconds(700)) {
         nanosecondsPerTick_ = calcNanosecondsPerTick();
         resyncIntervalTicks_ = resyncInterval.count() * nanosecondsPerTick_;

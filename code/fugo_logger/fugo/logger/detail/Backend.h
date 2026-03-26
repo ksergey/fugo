@@ -18,14 +18,14 @@
 namespace fugo::logger::detail {
 
 class Backend {
-  private:
+private:
     alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
     std::once_flag shutdownHandlesInstalledFlag_;
     LoggerQueueManager loggerQueueManager_;
     BackendThread backendThread_{loggerQueueManager_};
     std::mutex backendThreadMutex_;
 
-  public:
+public:
     [[nodiscard]] FUGO_FORCE_INLINE static auto instance() -> Backend* {
         static Backend instance;
         return &instance;
@@ -76,7 +76,7 @@ class Backend {
     /// Stop backend thread
     void stop();
 
-  private:
+private:
     Backend() = default;
 };
 

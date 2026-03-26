@@ -8,10 +8,10 @@
 namespace fugo::logger {
 
 class StdOutSink final : public Sink {
-  private:
+private:
     PatternFormatter formatter_;
 
-  public:
+public:
     StdOutSink(StdOutSink const&) = delete;
     StdOutSink& operator=(StdOutSink const&) = delete;
     StdOutSink() = default;

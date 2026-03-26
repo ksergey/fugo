@@ -17,7 +17,7 @@
 namespace fugo::logger::detail {
 
 class BackendThread final {
-  private:
+private:
     LoggerQueueManager& queueManager_;
     // Backend thread
     std::jthread thread_;
@@ -26,7 +26,7 @@ class BackendThread final {
     // Cache for message formatting
     fmt::memory_buffer formatBuffer_;
 
-  public:
+public:
     BackendThread(BackendThread const&) = delete;
     BackendThread& operator=(BackendThread const&) = delete;
 
@@ -47,7 +47,7 @@ class BackendThread final {
     /// Stop backend thread
     void stop();
 
-  private:
+private:
     auto processIncomingLogRecords(Sink& sink) -> std::size_t;
     void processLogRecord(Sink& sink, LogRecordHeader const* logRecordHeader, RecordMetadata const* metadata,
         std::byte const* argsBuffer);

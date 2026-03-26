@@ -12,14 +12,14 @@
 namespace fugo::logger {
 
 class DailyFileSink final : public Sink {
-  private:
+private:
     std::filesystem::path destination_;
     std::string prefix_;
     FileStream fileStream_;
     PatternFormatter formatter_;
     std::time_t nextRotateTime_ = 0;
 
-  public:
+public:
     DailyFileSink(DailyFileSink const&) = delete;
     DailyFileSink& operator=(DailyFileSink const&) = delete;
 
@@ -41,7 +41,7 @@ class DailyFileSink final : public Sink {
 
     void flush() override;
 
-  private:
+private:
     [[nodiscard]] auto reopen(std::time_t now) -> bool;
 };
 

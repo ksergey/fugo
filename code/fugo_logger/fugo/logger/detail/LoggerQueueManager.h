@@ -21,7 +21,7 @@ constexpr std::size_t kDefaultCapacityHint = 2 * 1024 * 1024;
 /// Queue manager
 /// Used for queues lifetime
 class LoggerQueueManager final {
-  private:
+private:
     std::vector<LoggerQueue::Consumer> queues_;
     std::vector<LoggerQueue::Consumer> pendingAddQueues_;
     SpinLock pendingAddQueuesLock_;
@@ -29,7 +29,7 @@ class LoggerQueueManager final {
     // Capacity for a new queues
     std::atomic<std::size_t> queueCapacityHint_{kDefaultCapacityHint};
 
-  public:
+public:
     LoggerQueueManager(LoggerQueueManager const&) = delete;
     LoggerQueueManager& operator=(LoggerQueueManager const&) = delete;
 
@@ -74,7 +74,7 @@ class LoggerQueueManager final {
         }
     }
 
-  private:
+private:
     void rebuildQueues();
 };
 
