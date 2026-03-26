@@ -9,7 +9,6 @@
 #include <type_traits>
 
 #include <fugo/core/TypeTraits.h>
-#include <fugo/sbe/Concepts.h>
 
 namespace fugo::logger {
 
@@ -86,12 +85,5 @@ struct Transform<T> {
         return static_cast<EnumT>(value);
     }
 };
-
-#if 0
-/// SBE flyweight object
-template <typename T>
-  requires fugo::sbe::SBEMessage<T>
-struct Transform<T> : detail::TransformNone<T> {};
-#endif
 
 } // namespace fugo::logger

@@ -1,7 +1,3 @@
 add_subdirectory(fugo_core)
-add_subdirectory(fugo_sbe)
 add_subdirectory(fugo_logger)
 add_subdirectory(fugo_config)
-add_subdirectory(fugo_service)
-
-add_subdirectory(sample)
