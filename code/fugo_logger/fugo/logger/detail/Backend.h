@@ -19,7 +19,7 @@ namespace fugo::logger::detail {
 
 class Backend {
 private:
-    alignas(kHardwareDestructiveInterferenceSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
+    alignas(kCacheLineSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
     std::once_flag shutdownHandlesInstalledFlag_;
     LoggerQueueManager loggerQueueManager_;
     BackendThread backendThread_{loggerQueueManager_};
@@ -35,7 +35,7 @@ public:
     Backend& operator=(Backend const&) = delete;
 
     /// Current log verbosity level
-    [[nodiscard]] FUGO_FORCE_INLINE auto logLevel() const noexcept {
+    [[nodiscard]] FUGO_FORCE_INLINE auto logLevel() const noexcept -> LogLevel {
         return logLevel_.load(std::memory_order_relaxed);
     }
 
@@ -45,7 +45,7 @@ public:
     }
 
     /// Return true on message with log verbosity value @c value should be logged
-    [[nodiscard]] FUGO_FORCE_INLINE auto shouldLog(LogLevel value) const noexcept {
+    [[nodiscard]] FUGO_FORCE_INLINE auto shouldLog(LogLevel value) const noexcept -> bool {
         return value <= this->logLevel();
     }
 
@@ -66,7 +66,7 @@ public:
     }
 
     /// Return true on backend ready to process log records
-    [[nodiscard]] FUGO_FORCE_INLINE auto isReady() const noexcept {
+    [[nodiscard]] FUGO_FORCE_INLINE auto isReady() const noexcept -> bool {
         return backendThread_.isRunning();
     }
 

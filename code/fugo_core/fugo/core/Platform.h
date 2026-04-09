@@ -18,10 +18,7 @@ namespace fugo {
 namespace core {
 
 /// @see <turboq/platform.h>
-constexpr std::size_t kHardwareDestructiveInterferenceSize = turboq::kHardwareDestructiveInterferenceSize;
-
-/// @see <turboq/platform.h>
-constexpr std::size_t kHardwareConstructiveInterferenceSize = turboq::kHardwareConstructiveInterferenceSize;
+constexpr std::size_t kCacheLineSize = turboq::kCacheLineSize;
 
 } // namespace core
 

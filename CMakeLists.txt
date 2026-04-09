@@ -25,9 +25,9 @@ endif()
 if (NOT TARGET cxxopts::cxxopts)
   add_subdirectory(deps/cxxopts)
 endif()
-if (NOT TARGET CURL::libcurl)
-  add_subdirectory(deps/curl)
-endif()
+# if (NOT TARGET CURL::libcurl)
+#   add_subdirectory(deps/curl)
+# endif()
 
 add_subdirectory(deps/turboq)
 
