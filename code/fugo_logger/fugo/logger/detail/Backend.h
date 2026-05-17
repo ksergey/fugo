@@ -19,7 +19,7 @@ namespace fugo::logger::detail {
 
 class Backend {
 private:
-    alignas(kCacheLineSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
+    alignas(kCpuCacheLineSize) std::atomic<LogLevel> logLevel_{LogLevel::Notice};
     std::once_flag shutdownHandlesInstalledFlag_;
     LoggerQueueManager loggerQueueManager_;
     BackendThread backendThread_{loggerQueueManager_};

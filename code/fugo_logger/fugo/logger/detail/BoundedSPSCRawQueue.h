@@ -351,8 +351,8 @@ class BoundedSPSCRawQueueImpl;
 
 struct BoundedSPSCRawQueueDefaultTraits {
     static constexpr std::string_view kTag = "fugo/logger-spsc-queue";
-    static constexpr std::size_t kSegmentSize = kCacheLineSize;
-    static constexpr std::size_t kAlign = kCacheLineSize;
+    static constexpr std::size_t kSegmentSize = kCpuCacheLineSize;
+    static constexpr std::size_t kAlign = kCpuCacheLineSize;
 };
 
 using BoundedSPSCRawQueue = BoundedSPSCRawQueueImpl<BoundedSPSCRawQueueDefaultTraits>;

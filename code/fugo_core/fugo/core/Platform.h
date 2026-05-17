@@ -18,7 +18,7 @@ namespace fugo {
 namespace core {
 
 /// @see <turboq/platform.h>
-constexpr std::size_t kCacheLineSize = turboq::kCacheLineSize;
+constexpr std::size_t kCpuCacheLineSize = turboq::kCpuCacheLineSize;
 
 } // namespace core
 
